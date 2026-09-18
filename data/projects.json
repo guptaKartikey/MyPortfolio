@@ -1,0 +1,133 @@
+{
+  "projects": [
+    {
+      "id": 1,
+      "name": "Image Captioning Transformer",
+      "description": "An end-to-end deep learning model that generates natural language captions for images using a Transformer-based architecture with CNN encoder and attention mechanism. Trained on COCO dataset with BLEU score evaluation.",
+      "technologies": [
+        "Python",
+        "TensorFlow",
+        "Transformers",
+        "Computer Vision",
+        "COCO Dataset"
+      ],
+      "category": "AI/ML",
+      "github": "https://github.com/guptaKartikey/diabetes-ai-project",
+      "demo": "[PLACEHOLDER]",
+      "image": "assets/projects/project_1_cloud.jpg",
+      "featured": true
+    },
+    {
+      "id": 2,
+      "name": "Amazon Clone",
+      "description": "A full-stack e-commerce web application replicating core Amazon features including product listings, user authentication, shopping cart, order management, and a responsive UI.",
+      "technologies": [
+        "HTML",
+        "CSS",
+        "JavaScript",
+        "Node.js",
+        "MongoDB"
+      ],
+      "category": "Web Development",
+      "github": "[PLACEHOLDER]",
+      "demo": "[PLACEHOLDER]",
+      "image": "",
+      "featured": true
+    },
+    {
+      "id": 3,
+      "name": "Weather App",
+      "description": "A clean, real-time weather application that fetches live data from a public weather API. Displays temperature, humidity, wind speed, and a 5-day forecast with an animated UI.",
+      "technologies": [
+        "HTML",
+        "CSS",
+        "JavaScript",
+        "OpenWeatherMap API"
+      ],
+      "category": "Web Development",
+      "github": "[PLACEHOLDER]",
+      "demo": "[PLACEHOLDER]",
+      "image": "",
+      "featured": false
+    },
+    {
+      "id": 4,
+      "name": "Notes Management System",
+      "description": "A full-featured notes application with CRUD operations, rich text editing, tagging, search functionality, and user authentication. Built with a Java Spring Boot backend and React frontend.",
+      "technologies": [
+        "Java",
+        "Spring Boot",
+        "React",
+        "MySQL"
+      ],
+      "category": "Java",
+      "github": "[PLACEHOLDER]",
+      "demo": "[PLACEHOLDER]",
+      "image": "",
+      "featured": false
+    },
+    {
+      "id": 5,
+      "name": "Task Manager",
+      "description": "A productivity-focused task management application with drag-and-drop Kanban board, priority levels, due date reminders, and progress tracking. Built with Python and Streamlit.",
+      "technologies": [
+        "Python",
+        "Streamlit",
+        "SQLite"
+      ],
+      "category": "Python",
+      "github": "[PLACEHOLDER]",
+      "demo": "[PLACEHOLDER]",
+      "image": "",
+      "featured": false
+    },
+    {
+      "id": 6,
+      "name": "AI Tic-Tac-Toe",
+      "description": "An intelligent Tic-Tac-Toe game featuring an unbeatable AI opponent powered by the Minimax algorithm with Alpha-Beta pruning. Includes multiple difficulty levels and an animated game board.",
+      "technologies": [
+        "Python",
+        "Minimax Algorithm",
+        "Pygame"
+      ],
+      "category": "AI/ML",
+      "github": "[PLACEHOLDER]",
+      "demo": "[PLACEHOLDER]",
+      "image": "",
+      "featured": false
+    },
+    {
+      "id": 7,
+      "name": "Rule-Based Chatbot",
+      "description": "An intelligent rule-based chatbot that uses pattern matching and a knowledge base to handle FAQs, provide information, and guide users through common workflows. Built with Python and NLTK.",
+      "technologies": [
+        "Python",
+        "NLTK",
+        "Pattern Matching",
+        "JSON"
+      ],
+      "category": "AI/ML",
+      "github": "[PLACEHOLDER]",
+      "demo": "[PLACEHOLDER]",
+      "image": "",
+      "featured": false
+    },
+    {
+      "id": 8,
+      "name": "Browser-Based Chat Application",
+      "description": "A real-time browser-based chat application supporting multiple rooms, user presence, typing indicators, and message history using WebSockets.",
+      "technologies": [
+        "HTML",
+        "CSS",
+        "JavaScript",
+        "Node.js",
+        "Socket.io"
+      ],
+      "category": "Web Development",
+      "github": "[PLACEHOLDER]",
+      "demo": "[PLACEHOLDER]",
+      "image": "",
+      "featured": true
+    }
+  ]
+}

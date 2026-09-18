@@ -1,0 +1,24 @@
+{
+  "experiences": [
+    {
+      "id": 1,
+      "organization": "Oasis Infobyte",
+      "position": "Web Development Intern",
+      "duration": "[PLACEHOLDER — e.g., June 2024 – July 2024]",
+      "description": "Worked on real-world web development projects as part of a virtual internship program. Built and deployed responsive web applications using HTML, CSS, and JavaScript. Collaborated with a team to deliver project milestones on time.",
+      "technologies": ["HTML", "CSS", "JavaScript"],
+      "certificate_url": "[PLACEHOLDER]",
+      "type": "Internship"
+    },
+    {
+      "id": 2,
+      "organization": "CodSoft",
+      "position": "Python Programming Intern",
+      "duration": "[PLACEHOLDER — e.g., August 2024 – September 2024]",
+      "description": "Completed a Python programming internship developing multiple real-world projects including an AI chatbot, calculator, and task manager. Strengthened understanding of Python fundamentals, object-oriented programming, and application logic.",
+      "technologies": ["Python", "OOP", "NLTK"],
+      "certificate_url": "[PLACEHOLDER]",
+      "type": "Internship"
+    }
+  ]
+}

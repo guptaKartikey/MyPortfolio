@@ -1,0 +1,54 @@
+{
+  "certificates": [
+    {
+      "id": 1,
+      "title": "OCI 2025 Certified Generative AI Professional",
+      "issuer": "Oracle",
+      "date": "2025",
+      "credential_id": "[PLACEHOLDER]",
+      "verify_url": "[PLACEHOLDER]",
+      "image": "assets/certificates/cert_1_cloud.jpg",
+      "description": "Oracle Cloud Infrastructure certification validating expertise in Generative AI concepts, large language models, and OCI AI services."
+    },
+    {
+      "id": 2,
+      "title": "NPTEL Java Programming",
+      "issuer": "NPTEL — IIT",
+      "date": "[PLACEHOLDER]",
+      "credential_id": "[PLACEHOLDER]",
+      "verify_url": "[PLACEHOLDER]",
+      "image": "",
+      "description": "Comprehensive Java programming course covering OOP concepts, data structures, and application development."
+    },
+    {
+      "id": 3,
+      "title": "IBM SkillsBuild AI Fundamentals",
+      "issuer": "IBM",
+      "date": "[PLACEHOLDER]",
+      "credential_id": "[PLACEHOLDER]",
+      "verify_url": "[PLACEHOLDER]",
+      "image": "",
+      "description": "IBM AI Fundamentals covering machine learning principles, neural networks, and practical AI applications."
+    },
+    {
+      "id": 4,
+      "title": "Web Development Internship Certificate",
+      "issuer": "Oasis Infobyte",
+      "date": "[PLACEHOLDER]",
+      "credential_id": "[PLACEHOLDER]",
+      "verify_url": "[PLACEHOLDER]",
+      "image": "",
+      "description": "Certificate of completion for the Web Development internship program at Oasis Infobyte."
+    },
+    {
+      "id": 5,
+      "title": "Python Programming Internship Certificate",
+      "issuer": "CodSoft",
+      "date": "[PLACEHOLDER]",
+      "credential_id": "[PLACEHOLDER]",
+      "verify_url": "[PLACEHOLDER]",
+      "image": "",
+      "description": "Certificate of completion for the Python programming internship at CodSoft, covering real-world project development."
+    }
+  ]
+}

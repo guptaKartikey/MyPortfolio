@@ -1,0 +1,26 @@
+{
+  "name": "KARTIKEY GUPTA",
+  "tagline": "Data Analyst | AI/ML Developer | Software Developer",
+  "bio": "I am a passionate B.Tech Computer Science Engineering student with a strong interest in Artificial Intelligence, Machine Learning, and Software Development. I love building intelligent systems and exploring the intersection of code and creativity. Currently maintaining a SGPA of 8.75, I am always eager to learn new technologies and work on impactful real-world projects.",
+  "short_bio": "B.Tech CSE student | AI/ML Enthusiast | Building the future, one line of code at a time.",
+  "role": "B.Tech Computer Science Engineering Student",
+  "graduation_year": "2027",
+  "sgpa": "8.75",
+  "college": "Gurukula Kangri Vishwavidyalaya",
+  "location": "Jamshedpur,Jharkhand",
+  "email": "k78048101@gmail.com",
+  "phone": "9931471556",
+  "github": "https://github.com/",
+  "linkedin": "https://www.linkedin.com/in/kartikey-gupta-988206372/",
+  "instagram": "[PLACEHOLDER — Add your Instagram URL (optional)]",
+  "resume_file": "assets/resume/resume.pdf",
+  "profile_image": "assets/profile/profile.jpg",
+  "interests": [
+    "Artificial Intelligence",
+    "Machine Learning",
+    "Software Development",
+    "Web Development",
+    "Computer Vision",
+    "Generative AI"
+  ]
+}

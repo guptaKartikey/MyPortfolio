@@ -1,0 +1,11 @@
+# requirements.txt
+# ─────────────────────────────────────────────────────────────
+# Install everything with:
+#   pip install -r requirements.txt
+#
+# Then run the app:
+#   streamlit run app.py
+# ─────────────────────────────────────────────────────────────
+
+streamlit>=1.35.0
+Pillow>=10.0.0

@@ -1,0 +1,73 @@
+{
+  "categories": [
+    {
+      "name": "Programming Languages",
+      "icon": "💻",
+      "color": "#58ff00",
+      "skills": [
+        "Python",
+        "Java",
+        "C",
+        "AI/ML",
+        "PostgreSQL",
+        "PowerBI"
+      ]
+    },
+    {
+      "name": "Frontend Development",
+      "icon": "🎨",
+      "color": "#a855f7",
+      "skills": [
+        "HTML",
+        "CSS",
+        "JavaScript",
+        "React",
+        "Angular"
+      ]
+    },
+    {
+      "name": "Backend Development",
+      "icon": "⚙️",
+      "color": "#10b981",
+      "skills": [
+        "Spring Boot",
+        "Node.js",
+        "Express.js"
+      ]
+    },
+    {
+      "name": "Databases",
+      "icon": "🗄️",
+      "color": "#f59e0b",
+      "skills": [
+        "MongoDB",
+        "MySQL",
+        "SQL"
+      ]
+    },
+    {
+      "name": "AI / ML",
+      "icon": "🤖",
+      "color": "#ef4444",
+      "skills": [
+        "Machine Learning",
+        "Deep Learning",
+        "TensorFlow",
+        "Transformers",
+        "Computer Vision",
+        "Generative AI"
+      ]
+    },
+    {
+      "name": "Tools & Platforms",
+      "icon": "🛠️",
+      "color": "#06b6d4",
+      "skills": [
+        "Git",
+        "GitHub",
+        "VS Code",
+        "Streamlit"
+      ]
+    }
+  ]
+}
