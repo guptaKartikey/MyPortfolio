@@ -11,6 +11,153 @@ from utils.data_manager import load_skills
 from utils.helpers import inject_html
 
 
+# ── Skill name → Devicon class mapping ───────────────────────────────────────
+# Keys are lowercase; values are devicon CSS class names (without "devicon-")
+SKILL_ICONS: dict[str, str] = {
+    # Languages
+    "python":          "devicon-python-plain colored",
+    "java":            "devicon-java-plain colored",
+    "javascript":      "devicon-javascript-plain colored",
+    "js":              "devicon-javascript-plain colored",
+    "typescript":      "devicon-typescript-plain colored",
+    "ts":              "devicon-typescript-plain colored",
+    "c":               "devicon-c-plain colored",
+    "c++":             "devicon-cplusplus-plain colored",
+    "c#":              "devicon-csharp-plain colored",
+    "go":              "devicon-go-plain colored",
+    "golang":          "devicon-go-plain colored",
+    "rust":            "devicon-rust-plain colored",
+    "kotlin":          "devicon-kotlin-plain colored",
+    "swift":           "devicon-swift-plain colored",
+    "ruby":            "devicon-ruby-plain colored",
+    "r":               "devicon-r-plain colored",
+    "php":             "devicon-php-plain colored",
+    "dart":            "devicon-dart-plain colored",
+    "scala":           "devicon-scala-plain colored",
+    "perl":            "devicon-perl-plain colored",
+    "shell":           "devicon-bash-plain colored",
+    "bash":            "devicon-bash-plain colored",
+    "powershell":      "devicon-powershell-plain colored",
+    # Frontend
+    "html":            "devicon-html5-plain colored",
+    "html5":           "devicon-html5-plain colored",
+    "css":             "devicon-css3-plain colored",
+    "css3":            "devicon-css3-plain colored",
+    "react":           "devicon-react-original colored",
+    "react.js":        "devicon-react-original colored",
+    "reactjs":         "devicon-react-original colored",
+    "vue":             "devicon-vuejs-plain colored",
+    "vue.js":          "devicon-vuejs-plain colored",
+    "vuejs":           "devicon-vuejs-plain colored",
+    "angular":         "devicon-angularjs-plain colored",
+    "next.js":         "devicon-nextjs-plain colored",
+    "nextjs":          "devicon-nextjs-plain colored",
+    "nuxt.js":         "devicon-nuxtjs-plain colored",
+    "svelte":          "devicon-svelte-plain colored",
+    "tailwind":        "devicon-tailwindcss-plain colored",
+    "tailwindcss":     "devicon-tailwindcss-plain colored",
+    "bootstrap":       "devicon-bootstrap-plain colored",
+    "sass":            "devicon-sass-original colored",
+    "less":            "devicon-less-plain-wordmark colored",
+    "jquery":          "devicon-jquery-plain colored",
+    "three.js":        "devicon-threejs-original colored",
+    "threejs":         "devicon-threejs-original colored",
+    # Backend
+    "node.js":         "devicon-nodejs-plain colored",
+    "nodejs":          "devicon-nodejs-plain colored",
+    "express":         "devicon-express-original colored",
+    "express.js":      "devicon-express-original colored",
+    "django":          "devicon-django-plain colored",
+    "flask":           "devicon-flask-original colored",
+    "fastapi":         "devicon-fastapi-plain colored",
+    "spring":          "devicon-spring-plain colored",
+    "spring boot":     "devicon-spring-plain colored",
+    "laravel":         "devicon-laravel-plain colored",
+    "rails":           "devicon-rails-plain colored",
+    "ruby on rails":   "devicon-rails-plain colored",
+    "graphql":         "devicon-graphql-plain colored",
+    "rest api":        "devicon-fastapi-plain colored",
+    # Databases
+    "mysql":           "devicon-mysql-plain colored",
+    "postgresql":      "devicon-postgresql-plain colored",
+    "postgres":        "devicon-postgresql-plain colored",
+    "mongodb":         "devicon-mongodb-plain colored",
+    "redis":           "devicon-redis-plain colored",
+    "sqlite":          "devicon-sqlite-plain colored",
+    "oracle":          "devicon-oracle-original colored",
+    "firebase":        "devicon-firebase-plain colored",
+    "cassandra":       "devicon-cassandra-plain colored",
+    "neo4j":           "devicon-neo4j-plain colored",
+    "elasticsearch":   "devicon-elasticsearch-plain colored",
+    # AI / ML
+    "tensorflow":      "devicon-tensorflow-original colored",
+    "pytorch":         "devicon-pytorch-original colored",
+    "keras":           "devicon-keras-plain colored",
+    "scikit-learn":    "devicon-scikitlearn-plain colored",
+    "sklearn":         "devicon-scikitlearn-plain colored",
+    "numpy":           "devicon-numpy-plain colored",
+    "pandas":          "devicon-pandas-plain colored",
+    "opencv":          "devicon-opencv-plain colored",
+    "matplotlib":      "devicon-matplotlib-plain colored",
+    "jupyter":         "devicon-jupyter-plain colored",
+    "huggingface":     "devicon-tensorflow-original colored",
+    # Tools & Platforms
+    "git":             "devicon-git-plain colored",
+    "github":          "devicon-github-original colored",
+    "gitlab":          "devicon-gitlab-plain colored",
+    "docker":          "devicon-docker-plain colored",
+    "kubernetes":      "devicon-kubernetes-plain colored",
+    "aws":             "devicon-amazonwebservices-original colored",
+    "azure":           "devicon-azure-plain colored",
+    "gcp":             "devicon-googlecloud-plain colored",
+    "google cloud":    "devicon-googlecloud-plain colored",
+    "linux":           "devicon-linux-plain colored",
+    "ubuntu":          "devicon-ubuntu-plain colored",
+    "windows":         "devicon-windows8-original colored",
+    "nginx":           "devicon-nginx-original colored",
+    "apache":          "devicon-apache-plain colored",
+    "heroku":          "devicon-heroku-plain colored",
+    "vercel":          "devicon-vercel-plain colored",
+    "netlify":         "devicon-netlify-plain colored",
+    "vs code":         "devicon-vscode-plain colored",
+    "vscode":          "devicon-vscode-plain colored",
+    "intellij":        "devicon-intellij-plain colored",
+    "pycharm":         "devicon-pycharm-plain colored",
+    "postman":         "devicon-postman-plain colored",
+    "figma":           "devicon-figma-plain colored",
+    "xd":              "devicon-xd-plain colored",
+    "photoshop":       "devicon-photoshop-plain colored",
+    "illustrator":     "devicon-illustrator-plain colored",
+    "jira":            "devicon-jira-plain colored",
+    "confluence":      "devicon-confluence-original colored",
+    "trello":          "devicon-trello-plain colored",
+    "npm":             "devicon-npm-original-wordmark colored",
+    "yarn":            "devicon-yarn-plain colored",
+    "webpack":         "devicon-webpack-plain colored",
+    "vite":            "devicon-vitejs-plain colored",
+    "streamlit":       "devicon-streamlit-original colored",
+    "jupyter notebook":"devicon-jupyter-plain colored",
+    "anaconda":        "devicon-anaconda-original colored",
+    "flutter":         "devicon-flutter-plain colored",
+    "android":         "devicon-android-plain colored",
+    "swift ui":        "devicon-swift-plain colored",
+    "unity":           "devicon-unity-original colored",
+    "blender":         "devicon-blender-original colored",
+    "arduino":         "devicon-arduino-plain colored",
+    "raspberry pi":    "devicon-raspberrypi-line colored",
+}
+
+
+def _get_skill_icon_html(skill_name: str, accent_color: str, dot_color: str) -> str:
+    """Return an <i> tag for devicon, or a colored dot fallback."""
+    key = skill_name.strip().lower()
+    icon_class = SKILL_ICONS.get(key)
+    if icon_class:
+        return f'<i class="{icon_class}" style="font-size:1rem; vertical-align:middle;"></i>'
+    # fallback: colored dot
+    return f'<span style="display:inline-block;width:6px;height:6px;border-radius:50%;background:{dot_color};box-shadow:0 0 8px {dot_color};"></span>'
+
+
 # Category metadata mapping (Colors, 3D Icons, Descriptions)
 CATEGORY_META = {
     "Programming Languages": {
@@ -296,6 +443,8 @@ def render_skills():
     """
 
     inject_html(f"<style>{css}</style>")
+    # Load Devicon icon font (used in skill pills)
+    inject_html('<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/devicons/devicon@v2.16.0/devicon.min.css"/>')
     inject_html('<div id="skills"></div>')
 
     # Render Header section matching img2.jpeg
@@ -352,13 +501,13 @@ def render_skills():
             except Exception:
                 r, g, b = 0, 212, 255
 
-            # Skill pills HTML
+            # Skill pills HTML — with auto Devicon icon
             pills_html = "".join(
                 f'<span class="pill-item-img2" style="'
                 f'background: rgba({r}, {g}, {b}, 0.12); '
                 f'color: #ffffff; '
                 f'border: 1px solid rgba({r}, {g}, {b}, 0.3);">'
-                f'<span style="display:inline-block; width:6px; height:6px; border-radius:50%; background:{accent_color}; box-shadow:0 0 8px {accent_color};"></span>'
+                f'{_get_skill_icon_html(skill, accent_color, accent_color)}'
                 f'{skill}</span>'
                 for skill in skills
             )

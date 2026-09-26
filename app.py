@@ -45,6 +45,8 @@ from components.experience   import render_experience
 from components.certificates import render_certificates
 from components.contact      import render_contact
 from components.admin        import render_admin
+from components.preloader    import render_preloader
+from components.music_player import render_music_player
 
 
 # ── Ensure all folders exist on every run ────────────────────────────────────
@@ -61,9 +63,9 @@ GLOBAL_CSS = """
 
 /* ── CSS Variables ────────────────────────────────────────── */
 :root {
-  --bg-primary:    #0a0a0f;
-  --bg-secondary:  #0f0f1a;
-  --bg-card:       rgba(15, 15, 26, 0.8);
+  --bg-primary:    #000000;
+  --bg-secondary:  #080808;
+  --bg-card:       rgba(8, 8, 12, 0.85);
   --accent-cyan:   #00d4ff;
   --accent-purple: #a855f7;
   --accent-green:  #10b981;
@@ -85,8 +87,20 @@ a, a:hover, a:focus, a:active, a:visited {
   text-decoration: none !important;
 }
 
-html, body, [data-testid="stAppViewContainer"], .stApp, section.main, [data-testid="stMain"] {
-  background-color: var(--bg-primary) !important;
+html:not(.light-theme),
+body:not(.light-theme),
+[data-testid="stAppViewContainer"]:not(.light-theme),
+.stApp:not(.light-theme),
+section.main:not(.light-theme),
+[data-testid="stMain"]:not(.light-theme) {
+  background-color: #000000 !important;
+  background:
+    radial-gradient(ellipse 60% 50% at 0% 10%,   rgba(0, 212, 255, 0.20)  0%, transparent 60%),
+    radial-gradient(ellipse 55% 60% at 100% 90%,  rgba(168, 85, 247, 0.22) 0%, transparent 60%),
+    radial-gradient(ellipse 40% 35% at 85% 5%,   rgba(0, 212, 255, 0.10)  0%, transparent 55%),
+    radial-gradient(ellipse 35% 30% at 15% 95%,  rgba(16, 185, 129, 0.08) 0%, transparent 55%),
+    radial-gradient(ellipse 30% 25% at 50% 48%,  rgba(217, 70, 239, 0.07) 0%, transparent 55%),
+    #000000 !important;
   color: var(--text-primary) !important;
   font-family: var(--font-main) !important;
 }
@@ -106,12 +120,29 @@ header                                           { visibility: hidden !important
 
 /* Remove default constraints to fit full computer screen */
 .block-container {
-  padding-top: 0 !important;
+  padding-top: 64px !important;
   padding-bottom: 0 !important;
-  padding-left: 3rem !important;
-  padding-right: 3rem !important;
+  padding-left: 2.5rem !important;
+  padding-right: 2.5rem !important;
   max-width: 100% !important;
   width: 100% !important;
+}
+
+/* Eliminate extra spacing from headless/zero-height components before hero */
+div[data-testid="stCustomComponentV1"]:has(iframe[height="0"]),
+div[data-testid="stElementContainer"]:has(iframe[height="0"]),
+div[data-testid="element-container"]:has(iframe[height="0"]),
+iframe[height="0"],
+iframe[height="0px"] {
+  display: none !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  height: 0 !important;
+  min-height: 0 !important;
+}
+
+[data-testid="stVerticalBlock"] {
+  gap: 0 !important;
 }
 
 [data-testid="stAppViewContainer"] {
@@ -119,101 +150,196 @@ header                                           { visibility: hidden !important
   width: 100% !important;
 }
 
-/* ── Background gradient animation ───────────────────────── */
-body::before {
+[data-testid="stAppViewContainer"]:not(.light-theme) {
+  background:
+    radial-gradient(ellipse 60% 50% at 0% 10%,   rgba(0, 212, 255, 0.20)  0%, transparent 60%),
+    radial-gradient(ellipse 55% 60% at 100% 90%,  rgba(168, 85, 247, 0.22) 0%, transparent 60%),
+    radial-gradient(ellipse 40% 35% at 85% 5%,   rgba(0, 212, 255, 0.10)  0%, transparent 55%),
+    radial-gradient(ellipse 35% 30% at 15% 95%,  rgba(16, 185, 129, 0.08) 0%, transparent 55%),
+    radial-gradient(ellipse 30% 25% at 50% 48%,  rgba(217, 70, 239, 0.07) 0%, transparent 55%),
+    #000000 !important;
+  min-height: 100vh !important;
+}
+
+/* ── Background ambient lights ────────────────────────────── */
+body:not(.light-theme)::before {
   content: '';
   position: fixed;
   inset: 0;
   background:
-    radial-gradient(ellipse 60% 40% at 10% 20%, rgba(0,212,255,0.04) 0%, transparent 100%),
-    radial-gradient(ellipse 50% 60% at 90% 80%, rgba(168,85,247,0.04) 0%, transparent 100%);
+    radial-gradient(ellipse 55% 45% at 5% 15%,  rgba(0, 212, 255, 0.10) 0%, transparent 70%),
+    radial-gradient(ellipse 50% 55% at 92% 80%,  rgba(168, 85, 247, 0.12) 0%, transparent 70%),
+    radial-gradient(ellipse 40% 40% at 50% 50%,  rgba(217, 70, 239, 0.05) 0%, transparent 70%),
+    radial-gradient(ellipse 35% 30% at 80% 10%,  rgba(0, 212, 255, 0.06) 0%, transparent 70%),
+    radial-gradient(ellipse 30% 25% at 15% 85%,  rgba(16, 185, 129, 0.05) 0%, transparent 70%);
   pointer-events: none;
   z-index: 0;
 }
 
-/* ── Sticky navigation bar ────────────────────────────────── */
+/* ── Fixed navigation bar / Icon panel ─────────────────────── */
 .navbar {
-  position: sticky;
-  top: 0;
-  z-index: 9999;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 0 32px;
-  height: 62px;
-  background: rgba(10, 10, 15, 0.85);
-  backdrop-filter: blur(20px);
-  border-bottom: 1px solid var(--border-subtle);
-  box-shadow: 0 2px 20px rgba(0,0,0,0.3);
-  animation: slideDown 0.5s ease-out;
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  width: 100vw !important;
+  max-width: 100% !important;
+  height: 64px !important;
+  z-index: 999999 !important;
+  background: rgba(0, 0, 0, 0.88) !important;
+  backdrop-filter: blur(24px) saturate(180%) !important;
+  -webkit-backdrop-filter: blur(24px) saturate(180%) !important;
+  border-bottom: 1px solid rgba(0, 212, 255, 0.12) !important;
+  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.7), 0 0 15px rgba(0, 212, 255, 0.04) !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  animation: slideDown 0.4s cubic-bezier(0.16, 1, 0.3, 1) !important;
 }
 @keyframes slideDown {
   from { transform: translateY(-100%); opacity: 0; }
   to   { transform: translateY(0);     opacity: 1; }
 }
 
+.nav-container {
+  width: 100% !important;
+  max-width: 1400px !important;
+  padding: 0 28px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  height: 100% !important;
+  gap: 16px !important;
+}
+
 .nav-logo {
   font-family: var(--font-mono);
-  font-size: 1rem;
-  font-weight: 700;
+  font-size: 1.15rem;
+  font-weight: 800;
   background: linear-gradient(135deg, var(--accent-cyan), var(--accent-purple));
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
   letter-spacing: -0.5px;
-  text-decoration: none;
+  text-decoration: none !important;
+  display: inline-flex;
+  align-items: center;
+  transition: transform 0.25s ease;
+  flex-shrink: 0;
+}
+.nav-logo:hover {
+  transform: scale(1.08);
 }
 
 .nav-links {
-  display: flex;
-  gap: 6px;
-  list-style: none;
-  margin: 0; padding: 0;
+  display: flex !important;
+  align-items: center !important;
+  gap: 4px !important;
+  list-style: none !important;
+  margin: 0 !important;
+  padding: 4px 6px !important;
+  background: rgba(255, 255, 255, 0.03) !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+  border-radius: 50px !important;
+  backdrop-filter: blur(12px) !important;
+  -webkit-backdrop-filter: blur(12px) !important;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2) !important;
 }
+
+.nav-links li {
+  display: flex !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
 .nav-links a {
-  padding: 7px 16px;
-  border-radius: 8px;
-  color: var(--text-secondary);
-  text-decoration: none;
-  font-size: 0.84rem;
-  font-weight: 500;
-  transition: all 0.25s ease;
-  letter-spacing: 0.3px;
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 7px !important;
+  padding: 6px 14px !important;
+  border-radius: 50px !important;
+  color: var(--text-secondary) !important;
+  text-decoration: none !important;
+  font-size: 0.84rem !important;
+  font-weight: 500 !important;
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1) !important;
+  letter-spacing: 0.2px !important;
+  border: 1px solid transparent !important;
+  cursor: pointer !important;
+  white-space: nowrap !important;
 }
+
+.nav-links a .nav-icon {
+  font-size: 0.95rem !important;
+  transition: transform 0.25s ease !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  line-height: 1 !important;
+}
+
 .nav-links a:hover {
-  color: var(--accent-cyan);
-  background: rgba(0,212,255,0.08);
+  color: #ffffff !important;
+  background: rgba(0, 212, 255, 0.08) !important;
+  border-color: rgba(0, 212, 255, 0.25) !important;
+  transform: translateY(-1px) !important;
 }
+.nav-links a:hover .nav-icon {
+  transform: scale(1.15) !important;
+}
+
 .nav-links a.nav-active {
-  color: var(--accent-cyan);
-  background: rgba(0,212,255,0.1);
-  border-bottom: 2px solid var(--accent-cyan);
-  border-radius: 8px 8px 0 0;
+  color: #ffffff !important;
+  background: linear-gradient(135deg, rgba(0, 212, 255, 0.22), rgba(168, 85, 247, 0.22)) !important;
+  border: 1px solid rgba(0, 212, 255, 0.45) !important;
+  box-shadow: 0 0 16px rgba(0, 212, 255, 0.25) !important;
+  font-weight: 600 !important;
+}
+.nav-links a.nav-active .nav-icon {
+  transform: scale(1.1) !important;
+}
+
+.nav-actions {
+  display: flex !important;
+  align-items: center !important;
+  gap: 10px !important;
+  flex-shrink: 0;
 }
 
 .nav-admin-btn {
-  padding: 7px 18px;
-  border-radius: 50px;
-  background: linear-gradient(135deg, rgba(99,102,241,0.15), rgba(168,85,247,0.15));
+  padding: 7px 16px !important;
+  border-radius: 50px !important;
+  background: linear-gradient(135deg, rgba(99,102,241,0.15), rgba(168,85,247,0.15)) !important;
   color: #c4b5fd !important;
-  border: 1px solid rgba(168,85,247,0.3);
-  font-size: 0.82rem;
-  font-weight: 600;
-  text-decoration: none;
-  transition: all 0.25s;
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
+  border: 1px solid rgba(168,85,247,0.3) !important;
+  font-size: 0.82rem !important;
+  font-weight: 600 !important;
+  text-decoration: none !important;
+  transition: all 0.25s ease !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 6px !important;
 }
 .nav-admin-btn:hover {
   background: linear-gradient(135deg, rgba(99,102,241,0.28), rgba(168,85,247,0.28)) !important;
   border-color: rgba(168,85,247,0.6) !important;
-  transform: translateY(-1px);
+  transform: translateY(-1px) !important;
+  box-shadow: 0 0 15px rgba(168, 85, 247, 0.3) !important;
 }
 
-@media (max-width: 640px) {
-  .nav-links { display: none; }
-  .navbar { padding: 0 18px; }
+@media (max-width: 980px) {
+  .nav-links a .nav-text { display: none !important; }
+  .nav-links a { padding: 8px 10px !important; }
+  .nav-links a .nav-icon { font-size: 1.15rem !important; }
+}
+@media (max-width: 580px) {
+  .nav-container { padding: 0 12px !important; }
+  .nav-links { gap: 2px !important; padding: 2px 4px !important; }
+  .nav-links a { padding: 6px 8px !important; font-size: 0.95rem !important; }
+  .nav-admin-btn .admin-text { display: none !important; }
+  .nav-admin-btn { padding: 7px 10px !important; }
 }
 
 /* ── Section headings ─────────────────────────────────────── */
@@ -340,51 +466,161 @@ body::before {
 .light-theme [data-testid="stMain"],
 body.light-theme,
 [data-testid="stAppViewContainer"].light-theme {
-  --bg-primary: #f8fafc !important;
-  --bg-secondary: #f1f5f9 !important;
-  --bg-card: rgba(255, 255, 255, 0.92) !important;
+  --bg-primary: #f1f5f9 !important;
+  --bg-secondary: #e2e8f0 !important;
+  --bg-card: rgba(255, 255, 255, 0.96) !important;
   --text-primary: #0f172a !important;
   --text-secondary: #334155 !important;
   --text-muted: #64748b !important;
-  --border-subtle: rgba(0, 0, 0, 0.1) !important;
-  background-color: #f8fafc !important;
-  background: #f8fafc !important;
+  --border-subtle: rgba(0, 0, 0, 0.08) !important;
+  background-color: #f1f5f9 !important;
+  background: radial-gradient(ellipse 70% 50% at 5% 15%, rgba(0, 212, 255, 0.12) 0%, transparent 70%),
+              radial-gradient(ellipse 60% 60% at 95% 45%, rgba(168, 85, 247, 0.12) 0%, transparent 70%),
+              radial-gradient(ellipse 70% 60% at 50% 90%, rgba(16, 185, 129, 0.08) 0%, transparent 70%),
+              #f1f5f9 !important;
   color: #0f172a !important;
 }
 
+body.light-theme::before {
+  background:
+    radial-gradient(circle 800px at 10% 20%, rgba(0, 212, 255, 0.08) 0%, transparent 70%),
+    radial-gradient(circle 800px at 90% 80%, rgba(168, 85, 247, 0.08) 0%, transparent 70%) !important;
+}
+
 .light-theme .navbar {
-  background: rgba(255, 255, 255, 0.94) !important;
-  border-bottom: 1px solid rgba(0, 0, 0, 0.08) !important;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06) !important;
+  background: rgba(255, 255, 255, 0.92) !important;
+  border-bottom: 1.5px solid rgba(0, 212, 255, 0.25) !important;
+  box-shadow: 0 8px 32px rgba(2, 132, 199, 0.12), 0 2px 8px rgba(0, 0, 0, 0.04) !important;
+}
+
+.light-theme .nav-logo {
+  background: linear-gradient(135deg, #0284c7, #7e22ce) !important;
+  -webkit-background-clip: text !important;
+  -webkit-text-fill-color: transparent !important;
+}
+
+.light-theme .nav-links {
+  background: rgba(255, 255, 255, 0.85) !important;
+  border: 1px solid rgba(0, 212, 255, 0.25) !important;
+  box-shadow: 0 4px 20px rgba(2, 132, 199, 0.08) !important;
 }
 
 .light-theme .nav-links a {
   color: #334155 !important;
 }
 .light-theme .nav-links a:hover {
-  color: #00d4ff !important;
-  background: rgba(0,212,255,0.08) !important;
+  color: #0284c7 !important;
+  background: rgba(2, 132, 199, 0.1) !important;
+  border-color: rgba(2, 132, 199, 0.35) !important;
+}
+.light-theme .nav-links a.nav-active {
+  color: #ffffff !important;
+  background: linear-gradient(135deg, #0284c7, #7e22ce) !important;
+  border-color: transparent !important;
+  box-shadow: 0 4px 15px rgba(2, 132, 199, 0.35) !important;
+  font-weight: 700 !important;
 }
 
 .light-theme .theme-toggle-btn {
-  background: rgba(0, 0, 0, 0.06) !important;
-  border-color: rgba(0, 0, 0, 0.15) !important;
+  background: rgba(255, 255, 255, 0.9) !important;
+  border-color: rgba(0, 212, 255, 0.35) !important;
   color: #0f172a !important;
+  box-shadow: 0 4px 15px rgba(2, 132, 199, 0.15) !important;
+}
+.light-theme .theme-toggle-btn:hover {
+  background: rgba(2, 132, 199, 0.15) !important;
+  border-color: #0284c7 !important;
+  box-shadow: 0 0 20px rgba(2, 132, 199, 0.35) !important;
 }
 
-.light-theme .about-profile-card-3d,
-.light-theme .who-i-am-card-3d,
-.light-theme .edu-card-3d,
-.light-theme .skill-card-img2,
-.light-theme .project-card-3d,
-.light-theme .tl-card-3d,
-.light-theme .cert-card-3d,
-.light-theme .contact-info-card-3d,
+.light-theme .nav-admin-btn {
+  background: linear-gradient(135deg, rgba(99,102,241,0.12), rgba(168,85,247,0.12)) !important;
+  color: #7e22ce !important;
+  border-color: rgba(168,85,247,0.4) !important;
+  box-shadow: 0 4px 15px rgba(126, 34, 206, 0.12) !important;
+}
+.light-theme .nav-admin-btn:hover {
+  background: linear-gradient(135deg, rgba(99,102,241,0.22), rgba(168,85,247,0.22)) !important;
+  border-color: #7e22ce !important;
+  box-shadow: 0 6px 20px rgba(126, 34, 206, 0.25) !important;
+}
+
+.light-theme .section-title {
+  background: linear-gradient(135deg, #0f172a 0%, #0284c7 100%) !important;
+  -webkit-background-clip: text !important;
+  -webkit-text-fill-color: transparent !important;
+}
+.light-theme .section-subtitle {
+  color: #475569 !important;
+}
+.light-theme .section-sep {
+  border-top: 1.5px solid rgba(0, 212, 255, 0.15) !important;
+}
+
+.light-theme .about-profile-card-3d {
+  background: linear-gradient(145deg, rgba(255, 255, 255, 0.98), rgba(240, 249, 255, 0.94)) !important;
+  border: 1.5px solid rgba(0, 212, 255, 0.35) !important;
+  box-shadow: 0 15px 35px rgba(0, 212, 255, 0.14), 0 5px 15px rgba(0, 0, 0, 0.05), inset 0 1px 0 rgba(255, 255, 255, 1) !important;
+}
+.light-theme .who-i-am-card-3d {
+  background: linear-gradient(145deg, rgba(255, 255, 255, 0.98), rgba(245, 243, 255, 0.94)) !important;
+  border: 1.5px solid rgba(168, 85, 247, 0.32) !important;
+  box-shadow: 0 15px 35px rgba(168, 85, 247, 0.12), 0 5px 15px rgba(0, 0, 0, 0.04) !important;
+}
+.light-theme .edu-card-3d {
+  background: linear-gradient(145deg, rgba(255, 255, 255, 0.98), rgba(238, 242, 255, 0.94)) !important;
+  border: 1.5px solid rgba(99, 102, 241, 0.32) !important;
+  box-shadow: 0 12px 30px rgba(99, 102, 241, 0.12) !important;
+}
+.light-theme .skill-card-img2 {
+  background: linear-gradient(145deg, rgba(255, 255, 255, 0.98), rgba(248, 250, 252, 0.94)) !important;
+  border: 1.5px solid rgba(0, 212, 255, 0.28) !important;
+  box-shadow: 0 12px 30px rgba(2, 132, 199, 0.1) !important;
+}
+.light-theme .project-card-3d {
+  background: linear-gradient(145deg, rgba(255, 255, 255, 0.98), rgba(248, 250, 252, 0.94)) !important;
+  border: 1.5px solid rgba(0, 212, 255, 0.32) !important;
+  box-shadow: 0 15px 35px rgba(2, 132, 199, 0.12) !important;
+}
+.light-theme .tl-card-3d {
+  background: linear-gradient(145deg, rgba(255, 255, 255, 0.98), rgba(240, 249, 255, 0.94)) !important;
+  border: 1.5px solid rgba(0, 212, 255, 0.35) !important;
+  box-shadow: 0 15px 35px rgba(0, 212, 255, 0.14), 0 5px 15px rgba(0,0,0,0.05) !important;
+}
+.light-theme .tl-card-3d:hover {
+  transform: translateX(8px) !important;
+  border-color: #00d4ff !important;
+  box-shadow: 0 20px 45px rgba(0, 212, 255, 0.25), 0 0 25px rgba(0, 212, 255, 0.2) !important;
+}
+.light-theme .cert-card-3d {
+  background: linear-gradient(145deg, rgba(255, 255, 255, 0.98), rgba(250, 245, 255, 0.94)) !important;
+  border: 1.5px solid rgba(168, 85, 247, 0.35) !important;
+  box-shadow: 0 15px 35px rgba(168, 85, 247, 0.16), 0 5px 15px rgba(0,0,0,0.05) !important;
+}
+.light-theme .cert-card-3d:hover {
+  border-color: #a855f7 !important;
+  box-shadow: 0 22px 48px rgba(168, 85, 247, 0.28), 0 0 25px rgba(168, 85, 247, 0.25) !important;
+}
+.light-theme .contact-info-card-3d {
+  background: linear-gradient(145deg, rgba(255, 255, 255, 0.98), rgba(240, 253, 250, 0.94)) !important;
+  border: 1.5px solid rgba(16, 185, 129, 0.35) !important;
+  box-shadow: 0 15px 35px rgba(16, 185, 129, 0.14), 0 5px 15px rgba(0,0,0,0.05) !important;
+}
+
 .light-theme .portfolio-footer {
-  background: rgba(255, 255, 255, 0.92) !important;
-  border-color: rgba(0, 0, 0, 0.1) !important;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.06) !important;
-  color: #0f172a !important;
+  background: linear-gradient(145deg, rgba(255, 255, 255, 0.98), rgba(245, 243, 255, 0.95)) !important;
+  border-top: 2px solid rgba(0, 212, 255, 0.25) !important;
+  box-shadow: 0 -15px 40px rgba(2, 132, 199, 0.08) !important;
+  color: #334155 !important;
+}
+.light-theme .portfolio-footer a {
+  color: #475569 !important;
+}
+.light-theme .portfolio-footer a:hover {
+  color: #0284c7 !important;
+}
+.light-theme .portfolio-footer div {
+  color: #475569 !important;
 }
 
 .light-theme .skills-title,
@@ -413,7 +649,7 @@ body.light-theme,
 .light-theme .who-i-am-desc,
 .light-theme .card-category-desc,
 .light-theme .project-desc-3d,
-.light-theme .tl-desc,
+.light-theme .tl-desc-preview,
 .light-theme .cert-meta-3d,
 .light-theme .about-profile-role,
 .light-theme .about-stat-lbl,
@@ -428,9 +664,10 @@ body.light-theme,
 .light-theme .cert-badge,
 .light-theme .contact-badge,
 .light-theme .about-pill-badge {
-  background: rgba(0, 0, 0, 0.04) !important;
-  border-color: rgba(0, 0, 0, 0.12) !important;
-  color: #00d4ff !important;
+  background: linear-gradient(135deg, rgba(0, 212, 255, 0.12), rgba(168, 85, 247, 0.12)) !important;
+  border: 1.5px solid rgba(0, 212, 255, 0.4) !important;
+  color: #0284c7 !important;
+  box-shadow: 0 4px 15px rgba(0, 212, 255, 0.12) !important;
 }
 
 .light-theme .interest-pill-3d,
@@ -438,58 +675,74 @@ body.light-theme,
 .light-theme .social-icon-btn-3d,
 .light-theme .skill-pill-img2,
 .light-theme .proj-btn-gh-3d {
-  background: rgba(255, 255, 255, 0.95) !important;
+  background: #ffffff !important;
   color: #0f172a !important;
-  border-color: rgba(0, 0, 0, 0.12) !important;
+  border: 1.5px solid rgba(0, 212, 255, 0.28) !important;
+  box-shadow: 0 4px 14px rgba(0, 212, 255, 0.1) !important;
 }
 
 .light-theme [data-testid="stTextInput"] label,
 .light-theme [data-testid="stTextArea"] label,
 .light-theme [data-testid="stSelectbox"] label,
 .light-theme [data-testid="stWidgetLabel"] {
-  color: #1e293b !important;
-  font-weight: 600 !important;
+  color: #0f172a !important;
+  font-weight: 700 !important;
 }
 
 .light-theme [data-testid="stTextInput"] input,
 .light-theme [data-testid="stTextArea"] textarea,
 .light-theme [data-testid="stSelectbox"] select {
   background-color: #ffffff !important;
-  border-color: rgba(0, 0, 0, 0.18) !important;
+  border: 1.5px solid rgba(0, 212, 255, 0.3) !important;
   color: #0f172a !important;
+  box-shadow: 0 4px 15px rgba(2, 132, 199, 0.06) !important;
+}
+.light-theme [data-testid="stTextInput"] input:focus,
+.light-theme [data-testid="stTextArea"] textarea:focus {
+  border-color: #0284c7 !important;
+  box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.25) !important;
 }
 
 .light-theme [data-testid="stTextInput"] input::placeholder,
 .light-theme [data-testid="stTextArea"] textarea::placeholder {
-  color: #64748b !important;
+  color: #94a3b8 !important;
 }
 
 .light-theme [data-testid="stRadio"] label {
   color: #334155 !important;
 }
+.light-theme [data-testid="stExpander"] {
+  background: #ffffff !important;
+  border: 1.5px solid rgba(0, 212, 255, 0.25) !important;
+  box-shadow: 0 8px 25px rgba(2, 132, 199, 0.08) !important;
+}
 """
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
-# NAVIGATION HTML
+# NAVIGATION HTML (Fixed Icon Panel)
 # ═══════════════════════════════════════════════════════════════════════════════
 NAV_HTML = """
-<nav class="navbar">
-  <a class="nav-logo" href="#about"><span style="font-weight:900;">KG</span></a>
-  <ul class="nav-links">
-    <li><a href="#" class="nav-active">Home</a></li>
-    <li><a href="#about">About</a></li>
-    <li><a href="#skills">Skills</a></li>
-    <li><a href="#projects">Projects</a></li>
-    <li><a href="#experience">Experience</a></li>
-    <li><a href="#certificates">Certificates</a></li>
-    <li><a href="#contact">Contact</a></li>
-  </ul>
-  <div style="display: flex; align-items: center; gap: 10px;">
-    <button id="theme-toggle-btn" class="theme-toggle-btn" title="Toggle Light/Dark Theme">
-      <span id="theme-toggle-icon">🌙</span>
-    </button>
-    <a href="?admin=true" class="nav-admin-btn">&#128100; Admin</a>
+<nav class="navbar" id="main-navbar">
+  <div class="nav-container">
+    <a class="nav-logo" href="#home" data-target="home" title="Back to top">
+      <span>KG</span>
+    </a>
+    <ul class="nav-links" id="navbar-nav-links">
+      <li><a href="#home" class="nav-active" data-target="home"><span class="nav-icon">🏠</span><span class="nav-text">Home</span></a></li>
+      <li><a href="#about" data-target="about"><span class="nav-icon">👤</span><span class="nav-text">About</span></a></li>
+      <li><a href="#skills" data-target="skills"><span class="nav-icon">⚡</span><span class="nav-text">Skills</span></a></li>
+      <li><a href="#projects" data-target="projects"><span class="nav-icon">💻</span><span class="nav-text">Projects</span></a></li>
+      <li><a href="#experience" data-target="experience"><span class="nav-icon">💼</span><span class="nav-text">Experience</span></a></li>
+      <li><a href="#certificates" data-target="certificates"><span class="nav-icon">📜</span><span class="nav-text">Certificates</span></a></li>
+      <li><a href="#contact" data-target="contact"><span class="nav-icon">📬</span><span class="nav-text">Contact</span></a></li>
+    </ul>
+    <div class="nav-actions">
+      <button id="theme-toggle-btn" class="theme-toggle-btn" title="Toggle Light/Dark Theme">
+        <span id="theme-toggle-icon">🌙</span>
+      </button>
+      <a href="?admin=true" class="nav-admin-btn">&#128100; <span class="admin-text">Admin</span></a>
+    </div>
   </div>
 </nav>
 """
@@ -509,7 +762,7 @@ def _footer_html(name: str, github: str) -> str:
     background: rgba(13, 14, 28, 0.85);
     border-top: 1.5px solid rgba(0, 212, 255, 0.2);
     backdrop-filter: blur(16px);
-    padding: 35px 40px 25px;
+    padding: 24px 40px;
     margin-top: 60px;
     border-radius: 24px 24px 0 0;
     box-shadow: 0 -10px 30px rgba(0,0,0,0.4), 0 0 20px rgba(0,212,255,0.08);
@@ -518,35 +771,12 @@ def _footer_html(name: str, github: str) -> str:
 ">
     <div style="
         display: flex;
-        align-items: center;
-        justify-content: space-between;
-        flex-wrap: wrap;
-        gap: 16px;
-        max-width: 1400px;
-        margin: 0 auto 20px;
-    ">
-        <a href="#about" style="font-size: 1.4rem; font-weight: 900; color: #ffffff; text-decoration: none; font-family: 'Outfit', sans-serif;">
-            <span style="background: linear-gradient(135deg, #00d4ff, #a855f7); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">KG</span>
-        </a>
-        <div style="display: flex; gap: 20px; flex-wrap: wrap;">
-            <a href="#" style="color: #94a3b8; text-decoration: none; font-size: 0.86rem; font-weight: 600; transition: color 0.2s;">Home</a>
-            <a href="#about" style="color: #94a3b8; text-decoration: none; font-size: 0.86rem; font-weight: 600; transition: color 0.2s;">About</a>
-            <a href="#skills" style="color: #94a3b8; text-decoration: none; font-size: 0.86rem; font-weight: 600; transition: color 0.2s;">Skills</a>
-            <a href="#projects" style="color: #94a3b8; text-decoration: none; font-size: 0.86rem; font-weight: 600; transition: color 0.2s;">Projects</a>
-            <a href="#experience" style="color: #94a3b8; text-decoration: none; font-size: 0.86rem; font-weight: 600; transition: color 0.2s;">Experience</a>
-            <a href="#certificates" style="color: #94a3b8; text-decoration: none; font-size: 0.86rem; font-weight: 600; transition: color 0.2s;">Certificates</a>
-            <a href="#contact" style="color: #94a3b8; text-decoration: none; font-size: 0.86rem; font-weight: 600; transition: color 0.2s;">Contact</a>
-        </div>
-    </div>
-
-    <div style="
-        display: flex;
         justify-content: space-between;
         align-items: center;
         flex-wrap: wrap;
         gap: 12px;
-        padding-top: 18px;
-        border-top: 1px solid rgba(255,255,255,0.08);
+        max-width: 1400px;
+        margin: 0 auto;
         font-size: 0.92rem;
         font-weight: 600;
         color: #cbd5e1;
@@ -590,13 +820,59 @@ def main():
         # ── Portfolio mode ──────────────────────────────────────────────────
         profile = load_profile()
 
-        # Sticky navbar
+        # Cinematic Intro Preloader Overlay
+        render_preloader()
+
+        # Background ambient music player (floating pill button, bottom-right)
+        render_music_player()
+
+        # Fixed Navbar / Icon Panel
         inject_html(NAV_HTML)
 
-        # Theme sync and event listener engine
+        # Theme sync, smooth scroll, and ScrollSpy engine
         components.html("""
         <script>
-        (function initThemeEngine() {
+        (function initPortfolioEngine() {
+          var DARK_BG = [
+            'radial-gradient(ellipse 60% 50% at 0% 10%,   rgba(0, 212, 255, 0.20)  0%, transparent 60%)',
+            'radial-gradient(ellipse 55% 60% at 100% 90%,  rgba(168, 85, 247, 0.22) 0%, transparent 60%)',
+            'radial-gradient(ellipse 40% 35% at 85% 5%,   rgba(0, 212, 255, 0.10)  0%, transparent 55%)',
+            'radial-gradient(ellipse 35% 30% at 15% 95%,  rgba(16, 185, 129, 0.08) 0%, transparent 55%)',
+            'radial-gradient(ellipse 30% 25% at 50% 48%,  rgba(217, 70, 239, 0.07) 0%, transparent 55%)',
+            '#000000'
+          ].join(', ');
+
+          var LIGHT_BG = [
+            'radial-gradient(ellipse 70% 50% at 5% 15%, rgba(0, 212, 255, 0.14) 0%, transparent 70%)',
+            'radial-gradient(ellipse 60% 60% at 95% 45%, rgba(168, 85, 247, 0.14) 0%, transparent 70%)',
+            'radial-gradient(ellipse 70% 60% at 50% 90%, rgba(16, 185, 129, 0.10) 0%, transparent 70%)',
+            '#f1f5f9'
+          ].join(', ');
+
+          function applyBg(pDoc, isLight) {
+            var targets = [
+              pDoc.body,
+              pDoc.documentElement,
+              pDoc.querySelector('[data-testid="stAppViewContainer"]'),
+              pDoc.querySelector('.stApp'),
+              pDoc.querySelector('section.main'),
+              pDoc.querySelector('[data-testid="stMain"]')
+            ];
+            targets.forEach(function(el) {
+              if (el) {
+                if (isLight) {
+                  el.style.setProperty('background', LIGHT_BG, 'important');
+                  el.style.setProperty('background-color', '#f1f5f9', 'important');
+                  el.style.setProperty('color', '#0f172a', 'important');
+                } else {
+                  el.style.setProperty('background', DARK_BG, 'important');
+                  el.style.setProperty('background-color', '#000000', 'important');
+                  el.style.setProperty('color', '#e2e8f0', 'important');
+                }
+              }
+            });
+          }
+
           function applyTheme(theme) {
             const isLight = (theme === 'light');
             try {
@@ -616,6 +892,7 @@ def main():
                     else el.classList.remove('light-theme');
                   }
                 });
+                applyBg(pDoc, isLight);
                 const icons = pDoc.querySelectorAll('#theme-toggle-icon');
                 icons.forEach(ic => { ic.textContent = isLight ? '☀️' : '🌙'; });
               }
@@ -641,12 +918,116 @@ def main():
             } catch(e) {}
           }
 
+          function scrollToTop(pDoc) {
+            try {
+              var targets = [
+                pDoc.querySelector('[data-testid="stAppViewContainer"]'),
+                pDoc.querySelector('.stApp'),
+                pDoc.querySelector('section.main'),
+                pDoc.querySelector('[data-testid="stMain"]'),
+                pDoc.documentElement,
+                pDoc.body
+              ];
+              targets.forEach(function(el) {
+                if (el) {
+                  try { el.scrollTo({ top: 0, left: 0, behavior: 'smooth' }); } catch(e) {}
+                  try { el.scrollTop = 0; } catch(e) {}
+                }
+              });
+              try { if (window.parent && window.parent.scrollTo) window.parent.scrollTo({ top: 0, left: 0, behavior: 'smooth' }); } catch(e) {}
+              try { window.scrollTo({ top: 0, left: 0, behavior: 'smooth' }); } catch(e) {}
+              
+              var h = pDoc.getElementById('home');
+              if (h && h.scrollIntoView) {
+                h.scrollIntoView({ behavior: 'smooth', block: 'start' });
+              }
+            } catch(err) {
+              console.error("Scroll to top error:", err);
+            }
+          }
+
+          function setupNavLinksAndScrollSpy() {
+            try {
+              if (window.parent && window.parent.document) {
+                const pDoc = window.parent.document;
+                const links = pDoc.querySelectorAll('.navbar .nav-links a, .portfolio-footer a[data-target], .navbar .nav-logo');
+                const scrollContainer = pDoc.querySelector('[data-testid="stAppViewContainer"]') || window.parent;
+
+                links.forEach(link => {
+                  if (!link._boundClick) {
+                    link._boundClick = true;
+                    link.addEventListener('click', function(e) {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      const targetId = this.getAttribute('data-target') || (this.getAttribute('href') || '').replace('#', '');
+                      
+                      if (targetId === 'home' || !targetId) {
+                        scrollToTop(pDoc);
+                      } else {
+                        const targetEl = pDoc.getElementById(targetId);
+                        if (targetEl) {
+                          targetEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                        }
+                      }
+
+                      const navLinks = pDoc.querySelectorAll('.navbar .nav-links a');
+                      navLinks.forEach(l => {
+                        const tid = l.getAttribute('data-target') || (l.getAttribute('href') || '').replace('#', '');
+                        if ((targetId === 'home' && tid === 'home') || (tid === targetId)) {
+                          l.classList.add('nav-active');
+                        } else {
+                          l.classList.remove('nav-active');
+                        }
+                      });
+                    });
+                  }
+                });
+
+                // ScrollSpy observer
+                if (scrollContainer && !scrollContainer.dataset.spyBound) {
+                  scrollContainer.dataset.spyBound = 'true';
+                  const sections = ['contact', 'certificates', 'experience', 'projects', 'skills', 'about', 'home'];
+                  
+                  function updateActiveNav() {
+                    let activeId = '';
+                    for (let i = 0; i < sections.length; i++) {
+                      const secId = sections[i];
+                      const el = pDoc.getElementById(secId);
+                      if (el) {
+                        const rect = el.getBoundingClientRect();
+                        if (rect.top <= 200) {
+                          activeId = secId;
+                          break;
+                        }
+                      }
+                    }
+                    if (!activeId) activeId = 'home';
+                    const navLinks = pDoc.querySelectorAll('.navbar .nav-links a');
+                    navLinks.forEach(l => {
+                      const tid = l.getAttribute('data-target') || (l.getAttribute('href') || '').replace('#', '');
+                      if (tid === activeId) l.classList.add('nav-active');
+                      else l.classList.remove('nav-active');
+                    });
+                  }
+
+                  if (scrollContainer.addEventListener) {
+                    scrollContainer.addEventListener('scroll', updateActiveNav, { passive: true });
+                  }
+                  if (window.parent && window.parent.addEventListener) {
+                    window.parent.addEventListener('scroll', updateActiveNav, { passive: true });
+                  }
+                }
+              }
+            } catch(e) {}
+          }
+
           let savedTheme = 'dark';
           try { savedTheme = localStorage.getItem('portfolio-theme') || 'dark'; } catch(e) {}
           applyTheme(savedTheme);
 
           setInterval(function() {
             setupButtonListener();
+            setupNavLinksAndScrollSpy();
             let t = 'dark';
             try { t = localStorage.getItem('portfolio-theme') || 'dark'; } catch(e) {}
             applyTheme(t);
@@ -654,6 +1035,9 @@ def main():
         })();
         </script>
         """, height=0, width=0)
+
+        # ── Home Anchor ───────────────────────────────────────────────────
+        inject_html('<div id="home" style="position:relative;top:-64px;height:1px;width:100%;pointer-events:none;"></div>')
 
         # ── Hero ──────────────────────────────────────────────────────────
         render_hero()

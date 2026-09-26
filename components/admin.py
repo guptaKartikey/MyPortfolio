@@ -31,7 +31,7 @@ from utils.data_manager import (
     next_id,
     PROFILE_IMG_DIR, PROJECT_IMG_DIR, CERT_IMG_DIR, RESUME_DIR,
 )
-from utils.helpers import inject_html, save_uploaded_file
+from utils.helpers import inject_html, save_uploaded_file, is_placeholder
 
 
 # ── Password gate ─────────────────────────────────────────────────────────────
@@ -348,9 +348,9 @@ def _tab_certificates():
                         "id":            next_id(certs),
                         "title":         c_title.strip(),
                         "issuer":        c_issuer.strip(),
-                        "date":          c_date.strip()   or "[PLACEHOLDER]",
-                        "credential_id": c_cred.strip()   or "[PLACEHOLDER]",
-                        "verify_url":    c_verify.strip() or "[PLACEHOLDER]",
+                        "date":          c_date.strip()   or "",
+                        "credential_id": c_cred.strip()   or "",
+                        "verify_url":    c_verify.strip() or "",
                         "image":         img_path,
                         "description":   c_desc.strip(),
                     })
@@ -365,10 +365,10 @@ def _tab_certificates():
                 with c1:
                     e_title  = st.text_input("Title",        value=cert.get("title",""))
                     e_issuer = st.text_input("Issuer",       value=cert.get("issuer",""))
-                    e_date   = st.text_input("Date",         value=cert.get("date",""))
+                    e_date   = st.text_input("Date",         value="" if is_placeholder(cert.get("date","")) else cert.get("date",""))
                 with c2:
-                    e_cred   = st.text_input("Credential ID", value=cert.get("credential_id",""))
-                    e_verify = st.text_input("Verify URL",    value=cert.get("verify_url",""))
+                    e_cred   = st.text_input("Credential ID", value="" if is_placeholder(cert.get("credential_id","")) else cert.get("credential_id",""))
+                    e_verify = st.text_input("Verify URL",    value="" if is_placeholder(cert.get("verify_url","")) else cert.get("verify_url",""))
                     e_img    = st.file_uploader("Replace image", type=["jpg","jpeg","png"], key=f"cert_img_{ci}")
                 e_desc = st.text_area("Description", value=cert.get("description",""), height=80)
 

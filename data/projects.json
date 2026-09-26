@@ -128,6 +128,23 @@
       "demo": "[PLACEHOLDER]",
       "image": "",
       "featured": true
+    },
+    {
+      "id": 9,
+      "name": "Sales & Revenue Analytics Dashboard",
+      "description": "An interactive data analytics dashboard visualizing sales trends, revenue breakdown, customer segmentation, and KPI metrics. Built with Python, Pandas, and Plotly with drill-down filters and export functionality.",
+      "technologies": [
+        "Python",
+        "Pandas",
+        "Plotly",
+        "Streamlit",
+        "Excel"
+      ],
+      "category": "Data Analysis Dashboard",
+      "github": "[PLACEHOLDER]",
+      "demo": "[PLACEHOLDER]",
+      "image": "",
+      "featured": true
     }
   ]
 }

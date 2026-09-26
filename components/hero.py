@@ -15,6 +15,7 @@ import streamlit.components.v1 as components
 
 from utils.data_manager import load_profile, load_skills, load_projects, load_certificates
 from utils.helpers import get_file_as_b64, is_placeholder
+from components.skills import SKILL_ICONS, _get_skill_icon_html
 
 
 def _build_tech_stack(profile: dict) -> list[str]:
@@ -76,14 +77,11 @@ def render_hero():
     li_link = (f'<a href="{linkedin}" target="_blank" rel="noopener" class="btn-ghost">&#128188; LinkedIn</a>'
                if not is_placeholder(linkedin) else "")
 
-    # Tech stack
+    # Tech stack — Devicon icons (same as Skills section)
     tech_stack = _build_tech_stack(profile)
-    tech_icons = {"python":"🐍","java":"☕","sql":"🗄️","angular":"🅰️","spring":"🌱","power bi":"📊",
-                  "javascript":"🟨","react":"⚛️","node":"🟩","c++":"⚙️","c#":"🔷","kotlin":"🎯",
-                  "flutter":"💙","dart":"🎯","mongodb":"🍃","mysql":"🐬","html":"🌐","css":"🎨"}
     tech_list_html = "".join(
-        f'<div class="tech-row"><span class="tech-icon">'
-        f'{tech_icons.get(t.lower().split()[0], "💡")}</span>'
+        f'<div class="tech-row">'
+        f'<span class="tech-icon">{_get_skill_icon_html(t, "#00d4ff", "#00d4ff")}</span>'
         f'<span>{t}</span></div>'
         for t in tech_stack[:6]
     )
@@ -99,6 +97,7 @@ def render_hero():
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/devicons/devicon@v2.16.0/devicon.min.css"/>
 <style>
 /* ── Reset ── */
 *,*::before,*::after{{box-sizing:border-box;margin:0;padding:0}}
@@ -120,8 +119,8 @@ body{{
   grid-template-columns:1fr 1.1fr 0.85fr;
   gap:0 24px;
   align-items:center;
-  min-height:600px;
-  padding:28px 24px 0;
+  min-height:580px;
+  padding:8px 24px 0;
   max-width:1200px;
   margin:0 auto;
 }}
@@ -435,13 +434,20 @@ body.light-theme {{
   background: #f8fafc !important;
   color: #0f172a !important;
 }}
+body.light-theme #bg-canvas {{
+  background: radial-gradient(ellipse at 25% 35%, rgba(99,102,241,0.08) 0%, transparent 60%), radial-gradient(ellipse at 75% 65%, rgba(0,212,255,0.08) 0%, transparent 60%), #f8fafc !important;
+}}
 body.light-theme .hello-pill {{
   background: rgba(0,0,0,0.04);
   border-color: rgba(0,0,0,0.12);
-  color: #475569;
+  color: #334155;
 }}
 body.light-theme .name-first {{
   color: #0f172a;
+}}
+body.light-theme .name-last {{
+  background: linear-gradient(135deg,#4f46e5 0%,#9333ea 50%,#db2777 100%);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
 }}
 body.light-theme .hero-bio {{
   color: #475569;
@@ -453,28 +459,45 @@ body.light-theme .stat-lab {{
   color: #64748b;
 }}
 body.light-theme .stats-row {{
-  background: rgba(255,255,255,0.8);
-  border-color: rgba(0,0,0,0.08);
+  background: rgba(255,255,255,0.92);
+  border-color: rgba(0,0,0,0.1);
+  box-shadow: 0 4px 20px rgba(0,0,0,0.05);
 }}
 body.light-theme .stat-item {{
   border-right-color: rgba(0,0,0,0.08);
 }}
 body.light-theme .ring-inner {{
-  background: #f1f5f9;
+  background: #ffffff;
+  box-shadow: inset 0 0 15px rgba(0,0,0,0.08);
 }}
 body.light-theme .ring-placeholder {{
-  background: linear-gradient(135deg, #e2e8f0, #f1f5f9);
-  color: rgba(0,0,0,0.2);
+  background: linear-gradient(135deg, #f1f5f9, #e2e8f0);
+  color: rgba(15,23,42,0.25);
+}}
+body.light-theme .ring-glow1 {{
+  border-color: rgba(99,102,241,0.25);
+}}
+body.light-theme .ring-glow2 {{
+  border-color: rgba(168,85,247,0.18);
+}}
+body.light-theme .platform {{
+  background: radial-gradient(ellipse,rgba(99,102,241,0.3) 0%,transparent 70%);
 }}
 body.light-theme .float-badge {{
-  background: rgba(255,255,255,0.9);
+  background: rgba(255,255,255,0.94);
   border-color: rgba(0,0,0,0.1);
   color: #0f172a;
-  box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+  box-shadow: 0 6px 22px rgba(0,0,0,0.08);
 }}
 body.light-theme .spec-card {{
-  background: rgba(255,255,255,0.85);
-  border-color: rgba(0,0,0,0.08);
+  background: rgba(255,255,255,0.92);
+  border-color: rgba(0,0,0,0.09);
+  box-shadow: 0 4px 16px rgba(0,0,0,0.04);
+}}
+body.light-theme .spec-card:hover {{
+  background: #ffffff;
+  border-color: rgba(147,51,234,0.35);
+  box-shadow: 0 8px 25px rgba(147,51,234,0.12);
 }}
 body.light-theme .spec-title {{
   color: #0f172a;
@@ -484,35 +507,36 @@ body.light-theme .spec-sub {{
 }}
 body.light-theme .tech-stack-card,
 body.light-theme .quote-card {{
-  background: rgba(255,255,255,0.85);
-  border-color: rgba(0,0,0,0.08);
+  background: rgba(255,255,255,0.92);
+  border-color: rgba(0,0,0,0.09);
+  box-shadow: 0 6px 20px rgba(0,0,0,0.05);
 }}
 body.light-theme .tech-stack-title {{
   color: #0f172a;
 }}
 body.light-theme .tech-row {{
-  color: #475569;
+  color: #334155;
 }}
 body.light-theme .tech-row:hover {{
-  background: rgba(0,212,255,0.08);
-  color: #0f172a;
+  background: rgba(2,132,199,0.08);
+  color: #0284c7;
 }}
 body.light-theme .quote-text {{
-  color: #475569;
+  color: #334155;
 }}
 body.light-theme .quote-author {{
   color: #64748b;
 }}
 body.light-theme .btn-resume {{
-  background: rgba(0, 0, 0, 0.05) !important;
+  background: rgba(0, 0, 0, 0.04) !important;
   border: 1.5px solid rgba(0, 0, 0, 0.15) !important;
   color: #0f172a !important;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05) !important;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.04) !important;
 }}
 body.light-theme .btn-resume:hover {{
-  background: rgba(0, 212, 255, 0.12) !important;
-  border-color: rgba(0, 212, 255, 0.4) !important;
-  color: #0f172a !important;
+  background: rgba(2, 132, 199, 0.1) !important;
+  border-color: rgba(2, 132, 199, 0.4) !important;
+  color: #0284c7 !important;
   transform: translateY(-3px) !important;
 }}
 body.light-theme .tagline-row {{
@@ -667,7 +691,9 @@ body.light-theme .btn-ghost:hover {{
 </div>
 
 <script>
-// ── Theme Sync ─────────────────────────────────────────────────────────────
+// ── Theme Sync & Dynamic 3D Controller ─────────────────────────────────────
+let update3DTheme = null;
+
 (function syncHeroTheme() {{
   function checkTheme() {{
     let isLight = false;
@@ -684,12 +710,15 @@ body.light-theme .btn-ghost:hover {{
     }} else {{
       document.body.classList.remove('light-theme');
     }}
+    if (update3DTheme) {{
+      update3DTheme(isLight);
+    }}
   }}
   setInterval(checkTheme, 200);
   checkTheme();
 }})();
 
-// ── Three.js star-field background ──────────────────────────────────────────
+// ── Three.js star-field & 3D geometry background ───────────────────────────
 (async function() {{
   try {{
     const s = document.createElement('script');
@@ -709,30 +738,60 @@ body.light-theme .btn-ghost:hover {{
     const camera = new THREE.PerspectiveCamera(70,W/H,0.1,1000);
     camera.position.z = 5;
 
-    // Stars
+    // Stars / 3D Particles
     const N = 1500;
     const pos = new Float32Array(N*3);
     const col = new Float32Array(N*3);
-    const palette = [[0.0,0.78,1.0],[0.63,0.33,0.97],[0.98,0.29,0.6],[1,1,1]];
+    
+    const darkPalette = [[0.0,0.78,1.0],[0.63,0.33,0.97],[0.98,0.29,0.6],[1,1,1]];
+    const lightPalette = [[0.02,0.52,0.85],[0.48,0.18,0.82],[0.82,0.12,0.52],[0.04,0.65,0.68]];
+
     for(let i=0;i<N;i++){{
       pos[i*3]   = (Math.random()-0.5)*24;
       pos[i*3+1] = (Math.random()-0.5)*16;
       pos[i*3+2] = (Math.random()-0.5)*12;
-      const c = palette[Math.floor(Math.random()*palette.length)];
+      const c = darkPalette[Math.floor(Math.random()*darkPalette.length)];
       col[i*3]=c[0];col[i*3+1]=c[1];col[i*3+2]=c[2];
     }}
     const geo = new THREE.BufferGeometry();
     geo.setAttribute('position',new THREE.BufferAttribute(pos,3));
     geo.setAttribute('color',new THREE.BufferAttribute(col,3));
     const mat = new THREE.PointsMaterial({{size:0.04,vertexColors:true,transparent:true,opacity:0.7}});
-    scene.add(new THREE.Points(geo,mat));
+    const points = new THREE.Points(geo,mat);
+    scene.add(points);
 
-    // Wireframe sphere (subtle)
-    const sGeo = new THREE.SphereGeometry(2.2,12,12);
-    const sMat = new THREE.MeshBasicMaterial({{color:0x6366f1,wireframe:true,transparent:true,opacity:0.04}});
+    // Wireframe 3D sphere
+    const sGeo = new THREE.SphereGeometry(2.4,14,14);
+    const sMat = new THREE.MeshBasicMaterial({{color:0x6366f1,wireframe:true,transparent:true,opacity:0.06}});
     const sph  = new THREE.Mesh(sGeo,sMat);
-    sph.position.set(3,0,-3);
+    sph.position.set(3.2,0,-3);
     scene.add(sph);
+
+    // Wireframe 3D Icosahedron (Floating secondary 3D element)
+    const iGeo = new THREE.IcosahedronGeometry(1.2, 0);
+    const iMat = new THREE.MeshBasicMaterial({{color:0x00d4ff,wireframe:true,transparent:true,opacity:0.08}});
+    const ico  = new THREE.Mesh(iGeo,iMat);
+    ico.position.set(-3.5,-1,-2);
+    scene.add(ico);
+
+    let lastIsLight = null;
+    update3DTheme = function(isLight) {{
+      if (lastIsLight === isLight) return;
+      lastIsLight = isLight;
+      const pal = isLight ? lightPalette : darkPalette;
+      const colAttr = geo.getAttribute('color');
+      for (let i = 0; i < N; i++) {{
+        const c = pal[Math.floor(Math.random() * pal.length)];
+        colAttr.setXYZ(i, c[0], c[1], c[2]);
+      }}
+      colAttr.needsUpdate = true;
+      mat.size = isLight ? 0.052 : 0.04;
+      mat.opacity = isLight ? 0.75 : 0.7;
+      sMat.color.setHex(isLight ? 0x7e22ce : 0x6366f1);
+      sMat.opacity = isLight ? 0.12 : 0.06;
+      iMat.color.setHex(isLight ? 0x0284c7 : 0x00d4ff);
+      iMat.opacity = isLight ? 0.15 : 0.08;
+    }};
 
     // Mouse parallax
     let mx=0,my=0;
@@ -746,10 +805,11 @@ body.light-theme .btn-ghost:hover {{
       const t=Date.now()*0.001;
       sph.rotation.y=t*0.12;
       sph.rotation.x=t*0.08;
+      ico.rotation.x=t*0.15;
+      ico.rotation.y=t*0.18;
       camera.position.x+=(mx*0.5-camera.position.x)*0.04;
       camera.position.y+=(-my*0.3-camera.position.y)*0.04;
       camera.lookAt(scene.position);
-      mat.opacity=0.55+0.15*Math.sin(t);
       renderer.render(scene,camera);
     }}
     animate();
@@ -762,4 +822,4 @@ body.light-theme .btn-ghost:hover {{
 </body>
 </html>"""
 
-    components.html(html, height=630, scrolling=False)
+    components.html(html, height=600, scrolling=False)

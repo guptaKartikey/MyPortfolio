@@ -236,12 +236,29 @@ def render_about():
     }
 
     /* Light Theme Overrides */
-    .light-theme .about-profile-card-3d,
-    .light-theme .who-i-am-card-3d,
+    .light-theme .about-profile-card-3d {
+        background: linear-gradient(145deg, rgba(255, 255, 255, 0.98), rgba(240, 249, 255, 0.94)) !important;
+        border: 1.5px solid rgba(0, 212, 255, 0.35) !important;
+        box-shadow: 0 16px 40px rgba(0, 212, 255, 0.16), 0 4px 12px rgba(0, 0, 0, 0.04) !important;
+    }
+    .light-theme .about-img-wrap-3d img {
+        border-color: #0284c7 !important;
+        box-shadow: 0 0 25px rgba(2, 132, 199, 0.35) !important;
+    }
+    .light-theme .who-i-am-card-3d {
+        background: linear-gradient(145deg, rgba(255, 255, 255, 0.98), rgba(245, 243, 255, 0.94)) !important;
+        border: 1.5px solid rgba(168, 85, 247, 0.35) !important;
+        box-shadow: 0 16px 40px rgba(168, 85, 247, 0.14), 0 4px 12px rgba(0, 0, 0, 0.04) !important;
+    }
     .light-theme .edu-card-3d {
-        background: rgba(255, 255, 255, 0.92) !important;
-        border-color: rgba(0, 0, 0, 0.1) !important;
-        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.06) !important;
+        background: linear-gradient(145deg, rgba(255, 255, 255, 0.98), rgba(238, 242, 255, 0.94)) !important;
+        border: 1.5px solid rgba(99, 102, 241, 0.35) !important;
+        box-shadow: 0 14px 35px rgba(99, 102, 241, 0.14), 0 4px 12px rgba(0, 0, 0, 0.04) !important;
+    }
+    .light-theme .edu-icon-3d {
+        background: linear-gradient(135deg, rgba(99, 102, 241, 0.15), rgba(168, 85, 247, 0.15)) !important;
+        border-color: rgba(99, 102, 241, 0.35) !important;
+        box-shadow: 0 4px 15px rgba(99, 102, 241, 0.2) !important;
     }
     .light-theme .about-profile-name,
     .light-theme .about-stat-val,
@@ -257,30 +274,44 @@ def render_about():
     .light-theme .edu-meta-badges {
         color: #475569 !important;
     }
+    .light-theme .edu-meta-badge {
+        background: rgba(99, 102, 241, 0.08) !important;
+        border-color: rgba(99, 102, 241, 0.25) !important;
+    }
     .light-theme .interest-pill-3d {
-        background: rgba(255, 255, 255, 0.95) !important;
+        background: #ffffff !important;
         color: #0f172a !important;
-        border-color: rgba(0, 0, 0, 0.12) !important;
-        box-shadow: 0 4px 15px rgba(0,0,0,0.05) !important;
+        box-shadow: 0 6px 20px rgba(0, 0, 0, 0.06), 0 2px 8px rgba(0, 212, 255, 0.1) !important;
+    }
+    .light-theme .interest-pill-3d:hover {
+        transform: translateY(-4px) scale(1.03) !important;
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.12), 0 0 15px rgba(0, 212, 255, 0.25) !important;
     }
     .light-theme .social-icon-btn-3d {
-        background: rgba(0, 0, 0, 0.04) !important;
-        border-color: rgba(0, 0, 0, 0.12) !important;
-        color: #00d4ff !important;
+        background: #ffffff !important;
+        border: 1.5px solid rgba(0, 212, 255, 0.35) !important;
+        color: #0284c7 !important;
+        box-shadow: 0 4px 15px rgba(0, 212, 255, 0.15) !important;
     }
     .light-theme .social-icon-btn-3d:hover {
-        background: rgba(0, 212, 255, 0.15) !important;
-        color: #0f172a !important;
+        background: linear-gradient(135deg, #0284c7, #7e22ce) !important;
+        border-color: transparent !important;
+        color: #ffffff !important;
+        box-shadow: 0 6px 20px rgba(2, 132, 199, 0.35) !important;
     }
     .light-theme .about-stats-row-3d {
-        border-top-color: rgba(0, 0, 0, 0.08) !important;
-        border-bottom-color: rgba(0, 0, 0, 0.08) !important;
+        border-top: 1px solid rgba(0, 212, 255, 0.18) !important;
+        border-bottom: 1px solid rgba(0, 212, 255, 0.18) !important;
     }
     .light-theme .edu-header-label {
         color: #0284c7 !important;
     }
     .light-theme .edu-meta-badge span {
         color: #0284c7 !important;
+    }
+    .light-theme .btn-resume-3d {
+        background: linear-gradient(135deg, #0284c7 0%, #7e22ce 100%) !important;
+        box-shadow: 0 8px 25px rgba(2, 132, 199, 0.4) !important;
     }
     """
 

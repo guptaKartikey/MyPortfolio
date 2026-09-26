@@ -134,15 +134,29 @@ def render_contact():
     }
 
     /* Light Theme Overrides */
-    .light-theme .contact-info-card-3d,
+    .light-theme .contact-info-card-3d {
+        background: linear-gradient(145deg, rgba(255, 255, 255, 0.97), rgba(240, 249, 255, 0.93)) !important;
+        border: 1.5px solid rgba(0, 212, 255, 0.3) !important;
+        box-shadow: 0 14px 36px rgba(0, 212, 255, 0.12), 0 4px 14px rgba(0, 0, 0, 0.04) !important;
+    }
+    .light-theme .contact-info-card-3d:hover {
+        border-color: rgba(0, 212, 255, 0.65) !important;
+        box-shadow: 0 18px 44px rgba(0, 212, 255, 0.22), 0 0 25px rgba(0, 212, 255, 0.15) !important;
+    }
     .light-theme .social-btn-3d {
-        background: rgba(255, 255, 255, 0.92) !important;
-        border-color: rgba(0, 0, 0, 0.1) !important;
-        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.06) !important;
+        background: linear-gradient(145deg, rgba(255, 255, 255, 0.97), rgba(240, 249, 255, 0.93)) !important;
+        border: 1.5px solid rgba(0, 212, 255, 0.3) !important;
+        color: #0369a1 !important;
+        box-shadow: 0 8px 24px rgba(0, 212, 255, 0.1), 0 2px 8px rgba(0, 0, 0, 0.04) !important;
+    }
+    .light-theme .social-btn-3d:hover {
+        background: linear-gradient(135deg, rgba(0, 212, 255, 0.2), rgba(168, 85, 247, 0.15)) !important;
+        border-color: rgba(0, 212, 255, 0.65) !important;
+        color: #0284c7 !important;
+        box-shadow: 0 12px 28px rgba(0, 212, 255, 0.25) !important;
     }
     .light-theme .contact-title,
-    .light-theme .contact-text-value-3d,
-    .light-theme .social-btn-3d {
+    .light-theme .contact-text-value-3d {
         color: #0f172a !important;
     }
     .light-theme .contact-subtitle,
@@ -150,17 +164,19 @@ def render_contact():
         color: #475569 !important;
     }
     .light-theme .contact-badge {
-        background: rgba(0, 0, 0, 0.04) !important;
-        border-color: rgba(0, 0, 0, 0.12) !important;
+        background: rgba(0, 212, 255, 0.1) !important;
+        border-color: rgba(0, 212, 255, 0.3) !important;
         color: #0284c7 !important;
+        box-shadow: 0 4px 14px rgba(0, 212, 255, 0.1) !important;
     }
     .light-theme .contact-text-value-3d a,
     .light-theme .contact-text-value-3d a:hover {
         color: #0284c7 !important;
     }
     .light-theme .contact-icon-3d {
-        background: linear-gradient(135deg, rgba(0,212,255,0.12), rgba(168,85,247,0.12)) !important;
-        border-color: rgba(0,212,255,0.25) !important;
+        background: linear-gradient(135deg, rgba(0, 212, 255, 0.2), rgba(168, 85, 247, 0.2)) !important;
+        border: 1.5px solid rgba(0, 212, 255, 0.4) !important;
+        box-shadow: 0 4px 14px rgba(0, 212, 255, 0.18) !important;
     }
     .contact-form-title {
         color: #f8fafc;
@@ -170,6 +186,7 @@ def render_contact():
     }
     .light-theme .contact-handwritten {
         color: #0284c7 !important;
+        text-shadow: 0 0 10px rgba(2, 132, 199, 0.3) !important;
     }
     """
 
