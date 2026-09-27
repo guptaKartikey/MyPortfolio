@@ -1073,94 +1073,119 @@ def main():
             } catch(e) {}
           }
 
-          /* ── 1. 3D Scroll Parallax & Hero Stacking ── */
-          function setup3DScrollParallax(pDoc, scrollContainer) {
+          /* ── 1. 3D Scroll Parallax & Hero Stacking (Apple Keynote Effect) ── */
+          function setup3DScrollParallax(pDoc) {
             try {
-              if (scrollContainer && !scrollContainer._parallaxBound) {
-                scrollContainer._parallaxBound = true;
+              if (pDoc._parallaxBound) return;
+              pDoc._parallaxBound = true;
 
-                function updateParallax() {
-                  const scrollY = scrollContainer.scrollTop || (window.parent ? window.parent.scrollY : 0) || window.scrollY || 0;
-                  const heroIframe = pDoc.querySelector('div[data-testid="stCustomComponentV1"] iframe');
-                  if (heroIframe) {
-                    const heroWrap = heroIframe.closest('[data-testid="stElementContainer"]') || heroIframe.parentElement;
-                    if (heroWrap) {
-                      if (scrollY < 900) {
-                        const scale = Math.max(0.88, 1 - (scrollY * 0.00028));
-                        const translateY = scrollY * 0.36;
-                        const opacity = Math.max(0.2, 1 - (scrollY * 0.0013));
-                        const blur = Math.min(10, scrollY * 0.015);
-                        heroWrap.style.transform = `translateY(${translateY.toFixed(1)}px) scale(${scale.toFixed(4)})`;
-                        heroWrap.style.opacity = `${opacity.toFixed(3)}`;
-                        heroWrap.style.filter = `blur(${blur.toFixed(1)}px)`;
-                        heroWrap.style.transformOrigin = 'center top';
-                        heroWrap.style.willChange = 'transform, opacity, filter';
-                      } else {
-                        heroWrap.style.opacity = '0';
-                      }
-                    }
+              function getScroll() {
+                let y = 0;
+                if (window.parent && typeof window.parent.pageYOffset !== 'undefined') y = Math.max(y, window.parent.pageYOffset);
+                if (window.pageYOffset) y = Math.max(y, window.pageYOffset);
+                if (pDoc.documentElement && pDoc.documentElement.scrollTop) y = Math.max(y, pDoc.documentElement.scrollTop);
+                if (pDoc.body && pDoc.body.scrollTop) y = Math.max(y, pDoc.body.scrollTop);
+                const sc = pDoc.querySelector('[data-testid="stAppViewContainer"]');
+                if (sc && sc.scrollTop) y = Math.max(y, sc.scrollTop);
+                return y;
+              }
+
+              function updateParallax() {
+                const scrollY = getScroll();
+                const iframes = pDoc.querySelectorAll('iframe');
+                let heroIframe = null;
+                iframes.forEach(f => {
+                  if (f.offsetHeight >= 400 || (f.parentElement && f.parentElement.offsetHeight >= 400)) {
+                    heroIframe = f;
+                  }
+                });
+
+                if (heroIframe) {
+                  if (scrollY < 900) {
+                    const scale = Math.max(0.84, 1 - (scrollY * 0.00035));
+                    const translateY = scrollY * 0.42;
+                    const opacity = Math.max(0.05, 1 - (scrollY * 0.0016));
+                    const blur = Math.min(12, scrollY * 0.016);
+                    heroIframe.style.setProperty('transform', `translateY(${translateY.toFixed(1)}px) scale(${scale.toFixed(4)})`, 'important');
+                    heroIframe.style.setProperty('opacity', `${opacity.toFixed(3)}`, 'important');
+                    heroIframe.style.setProperty('filter', `blur(${blur.toFixed(1)}px)`, 'important');
+                    heroIframe.style.setProperty('transform-origin', 'center top', 'important');
+                    heroIframe.style.setProperty('will-change', 'transform, opacity, filter', 'important');
+
+                    try {
+                      heroIframe.contentWindow.postMessage({ type: 'HERO_SCROLL', scrollY: scrollY }, '*');
+                    } catch(err) {}
+                  } else {
+                    heroIframe.style.setProperty('opacity', '0', 'important');
                   }
                 }
-
-                if (scrollContainer.addEventListener) {
-                  scrollContainer.addEventListener('scroll', updateParallax, { passive: true });
-                }
-                if (window.parent && window.parent.addEventListener) {
-                  window.parent.addEventListener('scroll', updateParallax, { passive: true });
-                }
-                updateParallax();
               }
+
+              const scrollTargets = [
+                window,
+                window.parent,
+                pDoc,
+                pDoc.querySelector('[data-testid="stAppViewContainer"]'),
+                pDoc.querySelector('section.main'),
+                pDoc.querySelector('[data-testid="stMain"]')
+              ];
+              scrollTargets.forEach(t => {
+                if (t && t.addEventListener) {
+                  t.addEventListener('scroll', updateParallax, { passive: true });
+                }
+              });
+              setInterval(updateParallax, 50);
             } catch(e) {}
           }
 
-          /* ── 2. 3D Card Tilt & Specular Sheen ── */
+          /* ── 2. 3D Magnetic Card Tilt & Specular Light Sheen ── */
           function setup3DCardTilt(pDoc) {
             try {
-              const cardSelectors = [
-                '.project-card-3d',
-                '.about-profile-card-3d',
-                '.about-details-card-3d',
-                '.skill-card-3d',
-                '.cert-card-3d',
-                '.timeline-card-3d',
-                '.contact-card-3d',
-                '.contact-form-3d',
-                '.spec-card'
-              ];
-              const cards = pDoc.querySelectorAll(cardSelectors.join(', '));
-              cards.forEach(card => {
-                if (card._tiltBound) return;
-                card._tiltBound = true;
+              if (pDoc._tiltEngineBound) return;
+              pDoc._tiltEngineBound = true;
 
-                let sheen = card.querySelector('.card-specular-sheen');
-                if (!sheen) {
-                  sheen = pDoc.createElement('div');
-                  sheen.className = 'card-specular-sheen';
-                  card.appendChild(sheen);
-                }
+              const SELECTORS = '.project-card-3d, .about-profile-card-3d, .who-i-am-card-3d, .edu-card-3d, .skill-card-img2, .cert-card-3d, .tl-card-3d, .contact-card-3d, .contact-form-3d';
 
-                card.addEventListener('mousemove', function(e) {
+              pDoc.addEventListener('mousemove', function(e) {
+                const card = e.target.closest(SELECTORS);
+                if (card) {
                   const r = card.getBoundingClientRect();
                   const x = e.clientX - r.left;
                   const y = e.clientY - r.top;
-                  const rx = ((y - r.height/2) / (r.height/2)) * -8;
-                  const ry = ((x - r.width/2) / (r.width/2)) * 8;
-                  card.style.transform = `perspective(1000px) rotateX(${rx.toFixed(2)}deg) rotateY(${ry.toFixed(2)}deg) translateY(-4px) scale3d(1.02, 1.02, 1.02)`;
-                  const isLight = pDoc.body.classList.contains('light-theme');
-                  const col = isLight ? 'rgba(0, 212, 255, 0.3)' : 'rgba(255, 255, 255, 0.2)';
-                  sheen.style.background = `radial-gradient(circle 280px at ${x}px ${y}px, ${col}, transparent 70%)`;
-                  sheen.style.opacity = '1';
-                });
+                  const rx = ((y - r.height/2) / (r.height/2)) * -9;
+                  const ry = ((x - r.width/2) / (r.width/2)) * 9;
+                  
+                  card.style.setProperty('transform', `perspective(1000px) rotateX(${rx.toFixed(2)}deg) rotateY(${ry.toFixed(2)}deg) translateY(-6px) scale3d(1.025, 1.025, 1.025)`, 'important');
+                  card.style.setProperty('box-shadow', '0 25px 60px rgba(0, 212, 255, 0.22), 0 0 35px rgba(168, 85, 247, 0.18)', 'important');
+                  card.style.setProperty('transition', 'transform 0.1s ease-out, box-shadow 0.2s ease', 'important');
 
-                card.addEventListener('mouseleave', function() {
-                  card.style.transform = 'perspective(1000px) rotateX(0deg) rotateY(0deg) translateY(0px) scale3d(1, 1, 1)';
-                  sheen.style.opacity = '0';
-                });
-              });
+                  let sheen = card.querySelector('.card-specular-sheen');
+                  if (!sheen) {
+                    sheen = pDoc.createElement('div');
+                    sheen.className = 'card-specular-sheen';
+                    sheen.style.cssText = 'position:absolute;inset:0;border-radius:inherit;pointer-events:none;z-index:10;mix-blend-mode:overlay;transition:opacity 0.2s ease;';
+                    card.style.position = 'relative';
+                    card.appendChild(sheen);
+                  }
+                  sheen.style.background = `radial-gradient(circle 260px at ${x}px ${y}px, rgba(255,255,255,0.35), transparent 70%)`;
+                  sheen.style.opacity = '1';
+                }
+              }, { passive: true });
+
+              pDoc.addEventListener('mouseout', function(e) {
+                const card = e.target.closest(SELECTORS);
+                if (card && (!e.relatedTarget || !card.contains(e.relatedTarget))) {
+                  card.style.setProperty('transform', 'perspective(1000px) rotateX(0deg) rotateY(0deg) translateY(0px) scale3d(1, 1, 1)', 'important');
+                  card.style.setProperty('box-shadow', '', '');
+                  card.style.setProperty('transition', 'transform 0.4s ease, box-shadow 0.4s ease', 'important');
+                  const sheen = card.querySelector('.card-specular-sheen');
+                  if (sheen) sheen.style.opacity = '0';
+                }
+              }, { passive: true });
             } catch(e) {}
           }
 
-          /* ── 3. Fluid Glowing Cursor Aura ── */
+          /* ── 3. Fluid Glowing Neon Cursor Aura ── */
           function setupFluidCursor(pDoc) {
             try {
               if (pDoc.getElementById('portfolio-cursor-aura')) return;
@@ -1170,39 +1195,39 @@ def main():
               aura.innerHTML = `
                 <style>
                   #portfolio-cursor-aura {
-                    position: fixed;
-                    top: 0; left: 0;
-                    width: 36px; height: 36px;
-                    margin-top: -18px; margin-left: -18px;
-                    border-radius: 50%;
-                    pointer-events: none;
-                    z-index: 9999999;
-                    border: 1.5px solid rgba(0, 212, 255, 0.7);
-                    background: radial-gradient(circle, rgba(0, 212, 255, 0.16) 0%, rgba(168, 85, 247, 0.08) 60%, transparent 80%);
-                    box-shadow: 0 0 18px rgba(0, 212, 255, 0.45);
-                    transition: width 0.25s cubic-bezier(0.16, 1, 0.3, 1), height 0.25s cubic-bezier(0.16, 1, 0.3, 1), margin 0.25s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.2s ease, background 0.2s ease, opacity 0.3s ease;
-                    opacity: 0;
-                    backdrop-filter: blur(2px);
-                    -webkit-backdrop-filter: blur(2px);
+                    position: fixed !important;
+                    top: 0 !important; left: 0 !important;
+                    width: 36px !important; height: 36px !important;
+                    margin-top: -18px !important; margin-left: -18px !important;
+                    border-radius: 50% !important;
+                    pointer-events: none !important;
+                    z-index: 9999999999 !important;
+                    border: 1.5px solid #00d4ff !important;
+                    background: radial-gradient(circle, rgba(0, 212, 255, 0.22) 0%, rgba(168, 85, 247, 0.12) 60%, transparent 80%) !important;
+                    box-shadow: 0 0 20px rgba(0, 212, 255, 0.6), inset 0 0 10px rgba(168, 85, 247, 0.4) !important;
+                    transition: width 0.25s cubic-bezier(0.16, 1, 0.3, 1), height 0.25s cubic-bezier(0.16, 1, 0.3, 1), margin 0.25s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.2s ease, background 0.2s ease, opacity 0.3s ease !important;
+                    opacity: 0 !important;
+                    backdrop-filter: blur(2px) !important;
+                    -webkit-backdrop-filter: blur(2px) !important;
                   }
                   #portfolio-cursor-dot {
-                    position: fixed;
-                    top: 0; left: 0;
-                    width: 7px; height: 7px;
-                    margin-top: -3.5px; margin-left: -3.5px;
-                    border-radius: 50%;
-                    pointer-events: none;
-                    z-index: 99999999;
-                    background: #00d4ff;
-                    box-shadow: 0 0 12px #00d4ff, 0 0 6px #ffffff;
-                    opacity: 0;
+                    position: fixed !important;
+                    top: 0 !important; left: 0 !important;
+                    width: 8px !important; height: 8px !important;
+                    margin-top: -4px !important; margin-left: -4px !important;
+                    border-radius: 50% !important;
+                    pointer-events: none !important;
+                    z-index: 99999999999 !important;
+                    background: #00d4ff !important;
+                    box-shadow: 0 0 14px #00d4ff, 0 0 6px #ffffff !important;
+                    opacity: 0 !important;
                   }
                   #portfolio-cursor-aura.cursor-hover {
-                    width: 60px; height: 60px;
-                    margin-top: -30px; margin-left: -30px;
-                    border-color: #a855f7;
-                    background: radial-gradient(circle, rgba(168, 85, 247, 0.26) 0%, rgba(0, 212, 255, 0.2) 60%, transparent 80%);
-                    box-shadow: 0 0 30px rgba(168, 85, 247, 0.6);
+                    width: 64px !important; height: 64px !important;
+                    margin-top: -32px !important; margin-left: -32px !important;
+                    border-color: #a855f7 !important;
+                    background: radial-gradient(circle, rgba(168, 85, 247, 0.32) 0%, rgba(0, 212, 255, 0.25) 60%, transparent 80%) !important;
+                    box-shadow: 0 0 35px rgba(168, 85, 247, 0.8) !important;
                   }
                   @media (hover: none), (max-width: 768px) {
                     #portfolio-cursor-aura, #portfolio-cursor-dot { display: none !important; }
@@ -1218,35 +1243,38 @@ def main():
               let mx = -100, my = -100;
               let ax = -100, ay = -100;
 
-              pDoc.addEventListener('mousemove', function(e) {
+              function handleMove(e) {
                 mx = e.clientX;
                 my = e.clientY;
-                aura.style.opacity = '1';
-                dot.style.opacity = '1';
-                dot.style.transform = `translate3d(${mx}px, ${my}px, 0)`;
-              });
+                aura.style.setProperty('opacity', '1', 'important');
+                dot.style.setProperty('opacity', '1', 'important');
+                dot.style.setProperty('transform', `translate3d(${mx}px, ${my}px, 0)`, 'important');
+              }
+
+              pDoc.addEventListener('mousemove', handleMove, { passive: true });
+              window.addEventListener('mousemove', handleMove, { passive: true });
 
               pDoc.addEventListener('mouseleave', function() {
-                aura.style.opacity = '0';
-                dot.style.opacity = '0';
+                aura.style.setProperty('opacity', '0', 'important');
+                dot.style.setProperty('opacity', '0', 'important');
               });
 
               function loopCursor() {
-                ax += (mx - ax) * 0.18;
-                ay += (my - ay) * 0.18;
-                aura.style.transform = `translate3d(${ax.toFixed(2)}px, ${ay.toFixed(2)}px, 0)`;
+                ax += (mx - ax) * 0.20;
+                ay += (my - ay) * 0.20;
+                aura.style.setProperty('transform', `translate3d(${ax.toFixed(2)}px, ${ay.toFixed(2)}px, 0)`, 'important');
                 requestAnimationFrame(loopCursor);
               }
               loopCursor();
 
               pDoc.addEventListener('mouseover', function(e) {
-                const target = e.target.closest('a, button, input, textarea, select, .project-card-3d, .spec-card, .skill-card-3d, .cert-card-3d, .timeline-card-3d, #lamp-rope-trigger, .theme-toggle-btn');
+                const target = e.target.closest('a, button, input, textarea, select, .project-card-3d, .about-profile-card-3d, .who-i-am-card-3d, .edu-card-3d, .skill-card-img2, .cert-card-3d, .tl-card-3d, .spec-card, #lamp-rope-trigger, .theme-toggle-btn');
                 if (target) {
                   aura.classList.add('cursor-hover');
                 } else {
                   aura.classList.remove('cursor-hover');
                 }
-              });
+              }, { passive: true });
             } catch(e) {}
           }
 
@@ -1302,8 +1330,9 @@ def main():
               const targets = pDoc.querySelectorAll(`
                 .section-header-wrap,
                 .about-profile-card-3d,
-                .about-details-card-3d,
-                .skill-card-3d,
+                .who-i-am-card-3d,
+                .edu-card-3d,
+                .skill-card-img2,
                 .project-card-3d,
                 .timeline-item,
                 .cert-card-3d,
@@ -1345,10 +1374,9 @@ def main():
           setInterval(function() {
             if (window.parent && window.parent.document) {
               const pDoc = window.parent.document;
-              const scrollContainer = pDoc.querySelector('[data-testid="stAppViewContainer"]') || window.parent;
               setupButtonListener();
               setupNavLinksAndScrollSpy();
-              setup3DScrollParallax(pDoc, scrollContainer);
+              setup3DScrollParallax(pDoc);
               setup3DCardTilt(pDoc);
               setupFluidCursor(pDoc);
               setupAnimatedCounters(pDoc);

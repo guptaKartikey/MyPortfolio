@@ -928,6 +928,25 @@ let update3DTheme = null;
     }});
   }} catch(e) {{}}
 }})();
+
+// ── Hero 3D Parallax Scroll Receiver ───────────────────────────────────────
+(function initHeroScrollReceiver() {{
+  window.addEventListener('message', function(e) {{
+    if (e.data && e.data.type === 'HERO_SCROLL') {{
+      const sy = e.data.scrollY || 0;
+      const heroEl = document.getElementById('hero');
+      if (heroEl) {{
+        const scale = Math.max(0.85, 1 - sy * 0.00035);
+        const blur = Math.min(10, sy * 0.015);
+        const op = Math.max(0.1, 1 - sy * 0.0018);
+        heroEl.style.transform = `scale(${{scale.toFixed(4)}})`;
+        heroEl.style.filter = `blur(${{blur.toFixed(1)}}px)`;
+        heroEl.style.opacity = `${{op.toFixed(3)}}`;
+        heroEl.style.transformOrigin = 'center top';
+      }}
+    }}
+  }});
+}})();
 </script>
 </body>
 </html>"""
