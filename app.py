@@ -739,18 +739,53 @@ body.light-theme::before {
   z-index: 1;
 }
 
-#about, #skills, #projects, #experience, #certificates, #contact {
-  position: relative;
-  z-index: 10;
+/* ── Hero Sticky Parallax Layer (Apple Stacking) ── */
+div[data-testid="stCustomComponentV1"]:has(iframe[height="600"]),
+div[data-testid="stElementContainer"]:has(iframe[height="600"]) {
+  position: sticky !important;
+  top: 64px !important;
+  z-index: 1 !important;
+  margin-bottom: 0 !important;
+}
+
+/* ── Content Sections Slide Directly Over Hero (Keynote Stack) ── */
+#about {
+  position: relative !important;
+  z-index: 10 !important;
+  background: #000000 !important;
+  box-shadow: 0 -35px 80px rgba(0, 0, 0, 0.98), 0 -2px 20px rgba(0, 212, 255, 0.3) !important;
+  border-top-left-radius: 32px !important;
+  border-top-right-radius: 32px !important;
+  padding-top: 48px !important;
+  margin-top: 30px !important;
+}
+
+.light-theme #about {
+  background: #f8fafc !important;
+  box-shadow: 0 -35px 80px rgba(0, 0, 0, 0.12), 0 -2px 15px rgba(2, 132, 199, 0.2) !important;
+}
+
+#skills, #projects, #experience, #certificates, #contact {
+  position: relative !important;
+  z-index: 10 !important;
+  background: #000000 !important;
+}
+.light-theme #skills, 
+.light-theme #projects, 
+.light-theme #experience, 
+.light-theme #certificates, 
+.light-theme #contact {
+  background: #f8fafc !important;
 }
 
 /* Card 3D perspective enhancements */
 .project-card-3d,
 .about-profile-card-3d,
-.about-details-card-3d,
-.skill-card-3d,
+.who-i-am-card-3d,
+.edu-card-3d,
+.skill-card-img2,
 .cert-card-3d,
-.timeline-card-3d,
+.tl-card-3d,
 .contact-card-3d,
 .contact-form-3d {
   position: relative;
@@ -763,7 +798,7 @@ body.light-theme::before {
   inset: 0;
   border-radius: inherit;
   pointer-events: none;
-  z-index: 5;
+  z-index: 8;
   mix-blend-mode: overlay;
   opacity: 0;
   transition: opacity 0.25s ease;
@@ -1101,23 +1136,22 @@ def main():
                 });
 
                 if (heroIframe) {
-                  if (scrollY < 900) {
-                    const scale = Math.max(0.84, 1 - (scrollY * 0.00035));
-                    const translateY = scrollY * 0.42;
-                    const opacity = Math.max(0.05, 1 - (scrollY * 0.0016));
-                    const blur = Math.min(12, scrollY * 0.016);
-                    heroIframe.style.setProperty('transform', `translateY(${translateY.toFixed(1)}px) scale(${scale.toFixed(4)})`, 'important');
-                    heroIframe.style.setProperty('opacity', `${opacity.toFixed(3)}`, 'important');
-                    heroIframe.style.setProperty('filter', `blur(${blur.toFixed(1)}px)`, 'important');
-                    heroIframe.style.setProperty('transform-origin', 'center top', 'important');
-                    heroIframe.style.setProperty('will-change', 'transform, opacity, filter', 'important');
+                  // Apple Keynote receding transform
+                  const p = Math.min(1, Math.max(0, scrollY / 600));
+                  const scale = 1 - (p * 0.12);
+                  const translateY = p * 60;
+                  const blur = p * 12;
+                  const opacity = 1 - (p * 0.70);
 
-                    try {
-                      heroIframe.contentWindow.postMessage({ type: 'HERO_SCROLL', scrollY: scrollY }, '*');
-                    } catch(err) {}
-                  } else {
-                    heroIframe.style.setProperty('opacity', '0', 'important');
-                  }
+                  heroIframe.style.setProperty('transform', `perspective(1000px) translateY(${translateY.toFixed(1)}px) scale(${scale.toFixed(4)})`, 'important');
+                  heroIframe.style.setProperty('opacity', `${opacity.toFixed(3)}`, 'important');
+                  heroIframe.style.setProperty('filter', `blur(${blur.toFixed(1)}px)`, 'important');
+                  heroIframe.style.setProperty('transform-origin', 'center top', 'important');
+                  heroIframe.style.setProperty('will-change', 'transform, opacity, filter', 'important');
+
+                  try {
+                    heroIframe.contentWindow.postMessage({ type: 'HERO_SCROLL', scrollY: scrollY }, '*');
+                  } catch(err) {}
                 }
               }
 
@@ -1134,54 +1168,98 @@ def main():
                   t.addEventListener('scroll', updateParallax, { passive: true });
                 }
               });
-              setInterval(updateParallax, 50);
+              setInterval(updateParallax, 40);
             } catch(e) {}
           }
 
-          /* ── 2. 3D Magnetic Card Tilt & Specular Light Sheen ── */
+          /* ── 2. BUTTER-SMOOTH 3D CARD TILT WITH DAMPED PHYSICS (rAF Lerp) ── */
           function setup3DCardTilt(pDoc) {
             try {
-              if (pDoc._tiltEngineBound) return;
-              pDoc._tiltEngineBound = true;
-
               const SELECTORS = '.project-card-3d, .about-profile-card-3d, .who-i-am-card-3d, .edu-card-3d, .skill-card-img2, .cert-card-3d, .tl-card-3d, .contact-card-3d, .contact-form-3d';
+              const cards = pDoc.querySelectorAll(SELECTORS);
 
-              pDoc.addEventListener('mousemove', function(e) {
-                const card = e.target.closest(SELECTORS);
-                if (card) {
-                  const r = card.getBoundingClientRect();
-                  const x = e.clientX - r.left;
-                  const y = e.clientY - r.top;
-                  const rx = ((y - r.height/2) / (r.height/2)) * -9;
-                  const ry = ((x - r.width/2) / (r.width/2)) * 9;
-                  
-                  card.style.setProperty('transform', `perspective(1000px) rotateX(${rx.toFixed(2)}deg) rotateY(${ry.toFixed(2)}deg) translateY(-6px) scale3d(1.025, 1.025, 1.025)`, 'important');
-                  card.style.setProperty('box-shadow', '0 25px 60px rgba(0, 212, 255, 0.22), 0 0 35px rgba(168, 85, 247, 0.18)', 'important');
-                  card.style.setProperty('transition', 'transform 0.1s ease-out, box-shadow 0.2s ease', 'important');
+              cards.forEach(card => {
+                if (card._tiltPhysicsBound) return;
+                card._tiltPhysicsBound = true;
 
-                  let sheen = card.querySelector('.card-specular-sheen');
-                  if (!sheen) {
-                    sheen = pDoc.createElement('div');
-                    sheen.className = 'card-specular-sheen';
-                    sheen.style.cssText = 'position:absolute;inset:0;border-radius:inherit;pointer-events:none;z-index:10;mix-blend-mode:overlay;transition:opacity 0.2s ease;';
-                    card.style.position = 'relative';
-                    card.appendChild(sheen);
+                card.style.setProperty('transform-style', 'preserve-3d', 'important');
+                card.style.setProperty('will-change', 'transform, box-shadow', 'important');
+
+                let rect = null;
+                let targetX = 0, targetY = 0;
+                let curX = 0, curY = 0;
+                let isHovered = false;
+                let rAF = null;
+
+                let sheen = card.querySelector('.card-specular-sheen');
+                if (!sheen) {
+                  sheen = pDoc.createElement('div');
+                  sheen.className = 'card-specular-sheen';
+                  sheen.style.cssText = 'position:absolute;inset:0;border-radius:inherit;pointer-events:none;z-index:8;mix-blend-mode:overlay;opacity:0;transition:opacity 0.25s ease;';
+                  card.style.position = card.style.position || 'relative';
+                  card.appendChild(sheen);
+                }
+
+                function updatePhysics() {
+                  if (!isHovered && Math.abs(curX) < 0.02 && Math.abs(curY) < 0.02) {
+                    curX = 0; curY = 0;
+                    card.style.setProperty('transform', 'perspective(1000px) rotateX(0deg) rotateY(0deg) translateY(0px) scale3d(1, 1, 1)', 'important');
+                    card.style.removeProperty('box-shadow');
+                    sheen.style.opacity = '0';
+                    rAF = null;
+                    return;
                   }
-                  sheen.style.background = `radial-gradient(circle 260px at ${x}px ${y}px, rgba(255,255,255,0.35), transparent 70%)`;
-                  sheen.style.opacity = '1';
-                }
-              }, { passive: true });
 
-              pDoc.addEventListener('mouseout', function(e) {
-                const card = e.target.closest(SELECTORS);
-                if (card && (!e.relatedTarget || !card.contains(e.relatedTarget))) {
-                  card.style.setProperty('transform', 'perspective(1000px) rotateX(0deg) rotateY(0deg) translateY(0px) scale3d(1, 1, 1)', 'important');
-                  card.style.setProperty('box-shadow', '', '');
-                  card.style.setProperty('transition', 'transform 0.4s ease, box-shadow 0.4s ease', 'important');
-                  const sheen = card.querySelector('.card-specular-sheen');
-                  if (sheen) sheen.style.opacity = '0';
+                  // Exponential damping (0.12 factor gives ultra-buttery smooth glide)
+                  curX += (targetX - curX) * 0.12;
+                  curY += (targetY - curY) * 0.12;
+
+                  const maxAngle = 10; // 10 degrees tilt
+                  const rotX = -curY * maxAngle;
+                  const rotY = curX * maxAngle;
+                  const lift = isHovered ? -6 : 0;
+                  const scale = isHovered ? 1.025 : 1;
+
+                  card.style.setProperty('transform', `perspective(1000px) rotateX(${rotX.toFixed(2)}deg) rotateY(${rotY.toFixed(2)}deg) translateY(${lift}px) scale3d(${scale}, ${scale}, ${scale})`, 'important');
+                  if (isHovered) {
+                    card.style.setProperty('box-shadow', '0 25px 60px rgba(0, 212, 255, 0.25), 0 0 35px rgba(168, 85, 247, 0.2)', 'important');
+                  }
+
+                  rAF = requestAnimationFrame(updatePhysics);
                 }
-              }, { passive: true });
+
+                card.addEventListener('mouseenter', function() {
+                  isHovered = true;
+                  rect = card.getBoundingClientRect();
+                  card.style.setProperty('transition', 'none', 'important');
+                  if (!rAF) rAF = requestAnimationFrame(updatePhysics);
+                });
+
+                card.addEventListener('mousemove', function(e) {
+                  if (!rect) rect = card.getBoundingClientRect();
+                  const mouseX = e.clientX - rect.left;
+                  const mouseY = e.clientY - rect.top;
+
+                  targetX = ((mouseX / rect.width) - 0.5) * 2;
+                  targetY = ((mouseY / rect.height) - 0.5) * 2;
+
+                  const px = (mouseX / rect.width) * 100;
+                  const py = (mouseY / rect.height) * 100;
+                  const isLight = pDoc.body.classList.contains('light-theme');
+                  const col = isLight ? 'rgba(0, 212, 255, 0.35)' : 'rgba(255, 255, 255, 0.3)';
+                  sheen.style.background = `radial-gradient(circle 280px at ${px.toFixed(1)}% ${py.toFixed(1)}%, ${col}, transparent 70%)`;
+                  sheen.style.opacity = '1';
+
+                  if (!rAF) rAF = requestAnimationFrame(updatePhysics);
+                });
+
+                card.addEventListener('mouseleave', function() {
+                  isHovered = false;
+                  targetX = 0;
+                  targetY = 0;
+                  card.style.setProperty('transition', 'transform 0.5s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.5s ease', 'important');
+                });
+              });
             } catch(e) {}
           }
 
