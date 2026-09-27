@@ -732,6 +732,42 @@ body.light-theme::before {
   border: 1.5px solid rgba(0, 212, 255, 0.25) !important;
   box-shadow: 0 8px 25px rgba(2, 132, 199, 0.08) !important;
 }
+
+/* ── Premium Stacking & Layering (Apple Parallax Effect) ── */
+#home {
+  position: relative;
+  z-index: 1;
+}
+
+#about, #skills, #projects, #experience, #certificates, #contact {
+  position: relative;
+  z-index: 10;
+}
+
+/* Card 3D perspective enhancements */
+.project-card-3d,
+.about-profile-card-3d,
+.about-details-card-3d,
+.skill-card-3d,
+.cert-card-3d,
+.timeline-card-3d,
+.contact-card-3d,
+.contact-form-3d {
+  position: relative;
+  transform-style: preserve-3d;
+  will-change: transform, box-shadow;
+}
+
+.card-specular-sheen {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  z-index: 5;
+  mix-blend-mode: overlay;
+  opacity: 0;
+  transition: opacity 0.25s ease;
+}
 """
 
 
@@ -1037,13 +1073,287 @@ def main():
             } catch(e) {}
           }
 
+          /* ── 1. 3D Scroll Parallax & Hero Stacking ── */
+          function setup3DScrollParallax(pDoc, scrollContainer) {
+            try {
+              if (scrollContainer && !scrollContainer._parallaxBound) {
+                scrollContainer._parallaxBound = true;
+
+                function updateParallax() {
+                  const scrollY = scrollContainer.scrollTop || (window.parent ? window.parent.scrollY : 0) || window.scrollY || 0;
+                  const heroIframe = pDoc.querySelector('div[data-testid="stCustomComponentV1"] iframe');
+                  if (heroIframe) {
+                    const heroWrap = heroIframe.closest('[data-testid="stElementContainer"]') || heroIframe.parentElement;
+                    if (heroWrap) {
+                      if (scrollY < 900) {
+                        const scale = Math.max(0.88, 1 - (scrollY * 0.00028));
+                        const translateY = scrollY * 0.36;
+                        const opacity = Math.max(0.2, 1 - (scrollY * 0.0013));
+                        const blur = Math.min(10, scrollY * 0.015);
+                        heroWrap.style.transform = `translateY(${translateY.toFixed(1)}px) scale(${scale.toFixed(4)})`;
+                        heroWrap.style.opacity = `${opacity.toFixed(3)}`;
+                        heroWrap.style.filter = `blur(${blur.toFixed(1)}px)`;
+                        heroWrap.style.transformOrigin = 'center top';
+                        heroWrap.style.willChange = 'transform, opacity, filter';
+                      } else {
+                        heroWrap.style.opacity = '0';
+                      }
+                    }
+                  }
+                }
+
+                if (scrollContainer.addEventListener) {
+                  scrollContainer.addEventListener('scroll', updateParallax, { passive: true });
+                }
+                if (window.parent && window.parent.addEventListener) {
+                  window.parent.addEventListener('scroll', updateParallax, { passive: true });
+                }
+                updateParallax();
+              }
+            } catch(e) {}
+          }
+
+          /* ── 2. 3D Card Tilt & Specular Sheen ── */
+          function setup3DCardTilt(pDoc) {
+            try {
+              const cardSelectors = [
+                '.project-card-3d',
+                '.about-profile-card-3d',
+                '.about-details-card-3d',
+                '.skill-card-3d',
+                '.cert-card-3d',
+                '.timeline-card-3d',
+                '.contact-card-3d',
+                '.contact-form-3d',
+                '.spec-card'
+              ];
+              const cards = pDoc.querySelectorAll(cardSelectors.join(', '));
+              cards.forEach(card => {
+                if (card._tiltBound) return;
+                card._tiltBound = true;
+
+                let sheen = card.querySelector('.card-specular-sheen');
+                if (!sheen) {
+                  sheen = pDoc.createElement('div');
+                  sheen.className = 'card-specular-sheen';
+                  card.appendChild(sheen);
+                }
+
+                card.addEventListener('mousemove', function(e) {
+                  const r = card.getBoundingClientRect();
+                  const x = e.clientX - r.left;
+                  const y = e.clientY - r.top;
+                  const rx = ((y - r.height/2) / (r.height/2)) * -8;
+                  const ry = ((x - r.width/2) / (r.width/2)) * 8;
+                  card.style.transform = `perspective(1000px) rotateX(${rx.toFixed(2)}deg) rotateY(${ry.toFixed(2)}deg) translateY(-4px) scale3d(1.02, 1.02, 1.02)`;
+                  const isLight = pDoc.body.classList.contains('light-theme');
+                  const col = isLight ? 'rgba(0, 212, 255, 0.3)' : 'rgba(255, 255, 255, 0.2)';
+                  sheen.style.background = `radial-gradient(circle 280px at ${x}px ${y}px, ${col}, transparent 70%)`;
+                  sheen.style.opacity = '1';
+                });
+
+                card.addEventListener('mouseleave', function() {
+                  card.style.transform = 'perspective(1000px) rotateX(0deg) rotateY(0deg) translateY(0px) scale3d(1, 1, 1)';
+                  sheen.style.opacity = '0';
+                });
+              });
+            } catch(e) {}
+          }
+
+          /* ── 3. Fluid Glowing Cursor Aura ── */
+          function setupFluidCursor(pDoc) {
+            try {
+              if (pDoc.getElementById('portfolio-cursor-aura')) return;
+
+              const aura = pDoc.createElement('div');
+              aura.id = 'portfolio-cursor-aura';
+              aura.innerHTML = `
+                <style>
+                  #portfolio-cursor-aura {
+                    position: fixed;
+                    top: 0; left: 0;
+                    width: 36px; height: 36px;
+                    margin-top: -18px; margin-left: -18px;
+                    border-radius: 50%;
+                    pointer-events: none;
+                    z-index: 9999999;
+                    border: 1.5px solid rgba(0, 212, 255, 0.7);
+                    background: radial-gradient(circle, rgba(0, 212, 255, 0.16) 0%, rgba(168, 85, 247, 0.08) 60%, transparent 80%);
+                    box-shadow: 0 0 18px rgba(0, 212, 255, 0.45);
+                    transition: width 0.25s cubic-bezier(0.16, 1, 0.3, 1), height 0.25s cubic-bezier(0.16, 1, 0.3, 1), margin 0.25s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.2s ease, background 0.2s ease, opacity 0.3s ease;
+                    opacity: 0;
+                    backdrop-filter: blur(2px);
+                    -webkit-backdrop-filter: blur(2px);
+                  }
+                  #portfolio-cursor-dot {
+                    position: fixed;
+                    top: 0; left: 0;
+                    width: 7px; height: 7px;
+                    margin-top: -3.5px; margin-left: -3.5px;
+                    border-radius: 50%;
+                    pointer-events: none;
+                    z-index: 99999999;
+                    background: #00d4ff;
+                    box-shadow: 0 0 12px #00d4ff, 0 0 6px #ffffff;
+                    opacity: 0;
+                  }
+                  #portfolio-cursor-aura.cursor-hover {
+                    width: 60px; height: 60px;
+                    margin-top: -30px; margin-left: -30px;
+                    border-color: #a855f7;
+                    background: radial-gradient(circle, rgba(168, 85, 247, 0.26) 0%, rgba(0, 212, 255, 0.2) 60%, transparent 80%);
+                    box-shadow: 0 0 30px rgba(168, 85, 247, 0.6);
+                  }
+                  @media (hover: none), (max-width: 768px) {
+                    #portfolio-cursor-aura, #portfolio-cursor-dot { display: none !important; }
+                  }
+                </style>
+              `;
+              const dot = pDoc.createElement('div');
+              dot.id = 'portfolio-cursor-dot';
+
+              pDoc.body.appendChild(aura);
+              pDoc.body.appendChild(dot);
+
+              let mx = -100, my = -100;
+              let ax = -100, ay = -100;
+
+              pDoc.addEventListener('mousemove', function(e) {
+                mx = e.clientX;
+                my = e.clientY;
+                aura.style.opacity = '1';
+                dot.style.opacity = '1';
+                dot.style.transform = `translate3d(${mx}px, ${my}px, 0)`;
+              });
+
+              pDoc.addEventListener('mouseleave', function() {
+                aura.style.opacity = '0';
+                dot.style.opacity = '0';
+              });
+
+              function loopCursor() {
+                ax += (mx - ax) * 0.18;
+                ay += (my - ay) * 0.18;
+                aura.style.transform = `translate3d(${ax.toFixed(2)}px, ${ay.toFixed(2)}px, 0)`;
+                requestAnimationFrame(loopCursor);
+              }
+              loopCursor();
+
+              pDoc.addEventListener('mouseover', function(e) {
+                const target = e.target.closest('a, button, input, textarea, select, .project-card-3d, .spec-card, .skill-card-3d, .cert-card-3d, .timeline-card-3d, #lamp-rope-trigger, .theme-toggle-btn');
+                if (target) {
+                  aura.classList.add('cursor-hover');
+                } else {
+                  aura.classList.remove('cursor-hover');
+                }
+              });
+            } catch(e) {}
+          }
+
+          /* ── 4. Rolling Number Counters ── */
+          function setupAnimatedCounters(pDoc) {
+            try {
+              const counterEls = pDoc.querySelectorAll('.stat-val, .stat-num, [data-counter-val]');
+              if (window.IntersectionObserver) {
+                const observer = new IntersectionObserver((entries) => {
+                  entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                      const el = entry.target;
+                      if (el._counted) return;
+                      el._counted = true;
+
+                      const text = el.textContent.trim();
+                      const match = text.match(/^([0-9.]+)(.*)$/);
+                      if (match) {
+                        const targetNum = parseFloat(match[1]);
+                        const suffix = match[2] || '';
+                        const isFloat = match[1].includes('.');
+                        const decimals = isFloat ? (match[1].split('.')[1] || '').length : 0;
+                        const duration = 1600;
+                        const startTime = performance.now();
+
+                        function updateCounter(now) {
+                          const elapsed = now - startTime;
+                          const progress = Math.min(1, elapsed / duration);
+                          const eased = progress === 1 ? 1 : 1 - Math.pow(2, -10 * progress);
+                          const cur = targetNum * eased;
+                          el.textContent = cur.toFixed(decimals) + suffix;
+
+                          if (progress < 1) {
+                            requestAnimationFrame(updateCounter);
+                          } else {
+                            el.textContent = targetNum.toFixed(decimals) + suffix;
+                          }
+                        }
+                        requestAnimationFrame(updateCounter);
+                      }
+                    }
+                  });
+                }, { threshold: 0.3 });
+
+                counterEls.forEach(el => observer.observe(el));
+              }
+            } catch(e) {}
+          }
+
+          /* ── 5. Staggered Cascading Scroll Reveals ── */
+          function setupScrollReveals(pDoc) {
+            try {
+              const targets = pDoc.querySelectorAll(`
+                .section-header-wrap,
+                .about-profile-card-3d,
+                .about-details-card-3d,
+                .skill-card-3d,
+                .project-card-3d,
+                .timeline-item,
+                .cert-card-3d,
+                .contact-card-3d,
+                .contact-form-3d
+              `);
+
+              targets.forEach(el => {
+                if (!el.classList.contains('reveal-init')) {
+                  el.classList.add('reveal-init');
+                  el.style.opacity = '0';
+                  el.style.transform = 'translateY(28px)';
+                  el.style.transition = 'opacity 0.75s cubic-bezier(0.16, 1, 0.3, 1), transform 0.75s cubic-bezier(0.16, 1, 0.3, 1)';
+                  el.style.willChange = 'opacity, transform';
+                }
+              });
+
+              if (window.IntersectionObserver) {
+                const observer = new IntersectionObserver((entries) => {
+                  entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                      const el = entry.target;
+                      el.style.opacity = '1';
+                      el.style.transform = 'translateY(0)';
+                      observer.unobserve(el);
+                    }
+                  });
+                }, { threshold: 0.12, rootMargin: '0px 0px -40px 0px' });
+
+                targets.forEach(el => observer.observe(el));
+              }
+            } catch(e) {}
+          }
+
           let savedTheme = 'dark';
           try { savedTheme = localStorage.getItem('portfolio-theme') || 'dark'; } catch(e) {}
           applyTheme(savedTheme);
 
           setInterval(function() {
-            setupButtonListener();
-            setupNavLinksAndScrollSpy();
+            if (window.parent && window.parent.document) {
+              const pDoc = window.parent.document;
+              const scrollContainer = pDoc.querySelector('[data-testid="stAppViewContainer"]') || window.parent;
+              setupButtonListener();
+              setupNavLinksAndScrollSpy();
+              setup3DScrollParallax(pDoc, scrollContainer);
+              setup3DCardTilt(pDoc);
+              setupFluidCursor(pDoc);
+              setupAnimatedCounters(pDoc);
+              setupScrollReveals(pDoc);
+            }
             let t = 'dark';
             try { t = localStorage.getItem('portfolio-theme') || 'dark'; } catch(e) {}
             applyTheme(t);

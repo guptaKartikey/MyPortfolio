@@ -875,6 +875,59 @@ let update3DTheme = null;
     document.getElementById('bg-canvas').style.background='radial-gradient(ellipse at 30% 50%,rgba(99,102,241,0.06),transparent 60%),#090b17';
   }}
 }})();
+
+// ── Hero Stat Rolling Counters ─────────────────────────────────────────────
+(function initHeroCounters() {{
+  try {{
+    const stats = document.querySelectorAll('.stat-val');
+    stats.forEach(el => {{
+      const raw = el.textContent.trim();
+      const match = raw.match(/^([0-9.]+)(.*)$/);
+      if (match) {{
+        const target = parseFloat(match[1]);
+        const suffix = match[2] || '';
+        const isFloat = match[1].includes('.');
+        const decimals = isFloat ? (match[1].split('.')[1] || '').length : 0;
+        const duration = 1800;
+        const start = performance.now();
+        el.textContent = (0).toFixed(decimals) + suffix;
+
+        function tick(now) {{
+          const elapsed = now - start;
+          const progress = Math.min(1, elapsed / duration);
+          const eased = progress === 1 ? 1 : 1 - Math.pow(2, -10 * progress);
+          const cur = target * eased;
+          el.textContent = cur.toFixed(decimals) + suffix;
+          if (progress < 1) requestAnimationFrame(tick);
+          else el.textContent = target.toFixed(decimals) + suffix;
+        }}
+        setTimeout(() => requestAnimationFrame(tick), 350);
+      }}
+    }});
+  }} catch(e) {{}}
+}})();
+
+// ── Hero Cards 3D Tilt ─────────────────────────────────────────────────────
+(function initHeroTilt() {{
+  try {{
+    const cards = document.querySelectorAll('.spec-card, .tech-stack-card, .quote-card, .stats-row');
+    cards.forEach(card => {{
+      card.style.transformStyle = 'preserve-3d';
+      card.style.transition = 'transform 0.18s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.25s ease';
+      card.addEventListener('mousemove', e => {{
+        const r = card.getBoundingClientRect();
+        const x = e.clientX - r.left;
+        const y = e.clientY - r.top;
+        const rx = ((y - r.height/2) / (r.height/2)) * -7;
+        const ry = ((x - r.width/2) / (r.width/2)) * 7;
+        card.style.transform = `perspective(800px) rotateX(${{rx.toFixed(2)}}deg) rotateY(${{ry.toFixed(2)}}deg) translateY(-3px) scale(1.02)`;
+      }});
+      card.addEventListener('mouseleave', () => {{
+        card.style.transform = 'perspective(800px) rotateX(0deg) rotateY(0deg) translateY(0px) scale(1)';
+      }});
+    }});
+  }} catch(e) {{}}
+}})();
 </script>
 </body>
 </html>"""
