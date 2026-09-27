@@ -141,6 +141,22 @@ iframe[height="0px"] {
   min-height: 0 !important;
 }
 
+/* Center all custom component iframes (Hero, Preloader, Music Player) */
+div[data-testid="stCustomComponentV1"] {
+  width: 100% !important;
+  display: flex !important;
+  justify-content: center !important;
+  align-items: center !important;
+  margin: 0 auto !important;
+}
+
+div[data-testid="stCustomComponentV1"] > iframe {
+  width: 100% !important;
+  max-width: 100% !important;
+  display: block !important;
+  margin: 0 auto !important;
+}
+
 [data-testid="stVerticalBlock"] {
   gap: 0 !important;
 }

@@ -104,9 +104,14 @@ def render_hero():
 body{{
   background:#090b17;
   font-family:'Segoe UI',system-ui,sans-serif;
-  overflow:hidden;
+  overflow-x:hidden;
   color:#e2e8f0;
-  min-height:620px;
+  min-height:580px;
+  width:100%;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  margin:0 auto;
 }}
 
 /* ── Background canvas ── */
@@ -116,18 +121,21 @@ body{{
 #hero{{
   position:relative;z-index:1;
   display:grid;
-  grid-template-columns:1fr 1.1fr 0.85fr;
-  gap:0 24px;
+  grid-template-columns:1.05fr 1.15fr 0.85fr;
+  gap:0 28px;
   align-items:center;
+  justify-content:center;
   min-height:580px;
-  padding:8px 24px 0;
-  max-width:1200px;
+  padding:0 24px;
+  max-width:1240px;
+  width:100%;
   margin:0 auto;
 }}
 
 /* ════════════════════════ LEFT COLUMN ════════════════════════ */
 .col-left{{
   display:flex;flex-direction:column;gap:0;
+  justify-content:center;
   animation:fadeUp 0.8s ease both;
 }}
 
@@ -421,6 +429,55 @@ body{{
 }}
 .quote-author{{
   font-size:0.74rem;color:#475569;font-weight:600;
+}}
+
+/* ════════════════════════ RESPONSIVE ════════════════════════ */
+@media (max-width: 1060px) {{
+  #hero {{
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    max-width: 860px;
+    padding: 10px 16px;
+  }}
+  .col-right {{
+    grid-column: span 2;
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    gap: 16px;
+  }}
+  .tech-stack-card, .quote-card {{
+    flex: 1;
+  }}
+}}
+
+@media (max-width: 768px) {{
+  #hero {{
+    grid-template-columns: 1fr;
+    gap: 24px;
+    padding: 10px 12px;
+  }}
+  .col-left {{
+    align-items: center;
+    text-align: center;
+  }}
+  .hello-pill {{
+    margin: 0 auto 12px auto;
+  }}
+  .tagline-row, .cta-row {{
+    justify-content: center;
+  }}
+  .hero-bio {{
+    margin-left: auto;
+    margin-right: auto;
+    text-align: center;
+  }}
+  .stats-row {{
+    margin: 0 auto;
+  }}
+  .col-right {{
+    flex-direction: column;
+  }}
 }}
 
 /* ════════════════════════ ANIMATIONS ════════════════════════ */
