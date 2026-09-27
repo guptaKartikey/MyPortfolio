@@ -230,9 +230,42 @@ def render_preloader():
 
             var isDismissed = false;
 
+            function startMusic() {{
+                try {{
+                    function tryPlay() {{
+                        var audio = (window.parent && window.parent.document ? window.parent.document.getElementById('portfolio-audio-elem') : null) || document.getElementById('portfolio-audio-elem');
+                        if (audio) {{
+                            if (audio.paused) {{
+                                var p = audio.play();
+                                if (p !== undefined) {{
+                                    p.catch(function(e) {{ console.log('Autoplay deferred:', e); }});
+                                }}
+                            }}
+                            return true;
+                        }}
+                        return false;
+                    }}
+
+                    if (!tryPlay()) {{
+                        var retries = 0;
+                        var timer = setInterval(function() {{
+                            retries++;
+                            if (tryPlay() || retries >= 20) {{
+                                clearInterval(timer);
+                            }}
+                        }}, 150);
+                    }}
+                }} catch(err) {{
+                    console.error('Audio play error:', err);
+                }}
+            }}
+
             function pullAndDismiss() {{
                 if (isDismissed) return;
                 isDismissed = true;
+
+                // Automatically start ambient music on user gesture
+                startMusic();
 
                 // Animate pull stretch
                 if (ropeTrigger) {{
