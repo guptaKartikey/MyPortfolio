@@ -162,8 +162,14 @@ div[data-testid="stCustomComponentV1"] > iframe {
 }
 
 [data-testid="stAppViewContainer"] {
-  overflow-x: hidden !important;
+  overflow-x: clip !important;
   width: 100% !important;
+}
+
+section.main,
+[data-testid="stMain"],
+.block-container {
+  overflow-x: clip !important;
 }
 
 [data-testid="stAppViewContainer"]:not(.light-theme) {
@@ -733,7 +739,7 @@ body.light-theme::before {
   box-shadow: 0 8px 25px rgba(2, 132, 199, 0.08) !important;
 }
 
-/* ── Premium Stacking & Layering (Apple Parallax Effect) ── */
+/* ── Premium Stacking & Layering (Apple Keynote Effect) ── */
 #home {
   position: relative;
   z-index: 1;
@@ -741,41 +747,61 @@ body.light-theme::before {
 
 /* ── Hero Sticky Parallax Layer (Apple Stacking) ── */
 div[data-testid="stCustomComponentV1"]:has(iframe[height="600"]),
-div[data-testid="stElementContainer"]:has(iframe[height="600"]) {
+div[data-testid="stCustomComponentV1"]:has(iframe[style*="height: 600px"]),
+div[data-testid="stElementContainer"]:has(iframe[height="600"]),
+div[data-testid="stElementContainer"]:has(iframe[style*="height: 600px"]) {
+  position: -webkit-sticky !important;
   position: sticky !important;
   top: 64px !important;
   z-index: 1 !important;
   margin-bottom: 0 !important;
+  will-change: transform, opacity, filter !important;
 }
 
-/* ── Content Sections Slide Directly Over Hero (Keynote Stack) ── */
-#about {
+/* ── Content Sections Slide Directly Over Sticky Hero (Keynote Stack Sheet) ── */
+div[data-testid="stElementContainer"]:has(iframe[height="600"]) ~ div[data-testid="stElementContainer"],
+div[data-testid="stElementContainer"]:has(iframe[height="600"]) ~ div[data-testid="stHorizontalBlock"],
+div[data-testid="stElementContainer"]:has(iframe[height="600"]) ~ div[data-testid="stVerticalBlock"] {
+  position: relative !important;
+  z-index: 10 !important;
+}
+
+.keynote-sheet-header {
+  scroll-margin-top: 80px;
   position: relative !important;
   z-index: 10 !important;
   background: #000000 !important;
-  box-shadow: 0 -35px 80px rgba(0, 0, 0, 0.98), 0 -2px 20px rgba(0, 212, 255, 0.3) !important;
-  border-top-left-radius: 32px !important;
-  border-top-right-radius: 32px !important;
-  padding-top: 48px !important;
-  margin-top: 30px !important;
+  border-top-left-radius: 40px !important;
+  border-top-right-radius: 40px !important;
+  border-top: 1.5px solid rgba(0, 212, 255, 0.4) !important;
+  box-shadow: 0 -35px 80px rgba(0, 0, 0, 0.98), 0 -4px 25px rgba(0, 212, 255, 0.25) !important;
+  padding: 24px 0 12px !important;
+  margin-top: 24px !important;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
 }
 
-.light-theme #about {
+.light-theme .keynote-sheet-header {
   background: #f8fafc !important;
-  box-shadow: 0 -35px 80px rgba(0, 0, 0, 0.12), 0 -2px 15px rgba(2, 132, 199, 0.2) !important;
+  border-top: 1.5px solid rgba(2, 132, 199, 0.4) !important;
+  box-shadow: 0 -30px 70px rgba(0, 0, 0, 0.12), 0 -4px 20px rgba(2, 132, 199, 0.18) !important;
 }
 
-#skills, #projects, #experience, #certificates, #contact {
+.keynote-pill-handle {
+  width: 54px;
+  height: 5px;
+  border-radius: 10px;
+  background: linear-gradient(90deg, #00d4ff, #a855f7);
+  box-shadow: 0 0 12px rgba(0, 212, 255, 0.6);
+}
+
+#about, #skills, #projects, #experience, #certificates, #contact {
   position: relative !important;
   z-index: 10 !important;
-  background: #000000 !important;
-}
-.light-theme #skills, 
-.light-theme #projects, 
-.light-theme #experience, 
-.light-theme #certificates, 
-.light-theme #contact {
-  background: #f8fafc !important;
+  scroll-margin-top: 80px;
 }
 
 /* Card 3D perspective enhancements */
@@ -1116,12 +1142,16 @@ def main():
 
               function getScroll() {
                 let y = 0;
-                if (window.parent && typeof window.parent.pageYOffset !== 'undefined') y = Math.max(y, window.parent.pageYOffset);
-                if (window.pageYOffset) y = Math.max(y, window.pageYOffset);
-                if (pDoc.documentElement && pDoc.documentElement.scrollTop) y = Math.max(y, pDoc.documentElement.scrollTop);
-                if (pDoc.body && pDoc.body.scrollTop) y = Math.max(y, pDoc.body.scrollTop);
-                const sc = pDoc.querySelector('[data-testid="stAppViewContainer"]');
-                if (sc && sc.scrollTop) y = Math.max(y, sc.scrollTop);
+                try {
+                  if (window.parent && typeof window.parent.pageYOffset !== 'undefined') y = Math.max(y, window.parent.pageYOffset);
+                  if (window.pageYOffset) y = Math.max(y, window.pageYOffset);
+                  if (pDoc.documentElement && pDoc.documentElement.scrollTop) y = Math.max(y, pDoc.documentElement.scrollTop);
+                  if (pDoc.body && pDoc.body.scrollTop) y = Math.max(y, pDoc.body.scrollTop);
+                  const sc = pDoc.querySelector('[data-testid="stAppViewContainer"]');
+                  if (sc && sc.scrollTop) y = Math.max(y, sc.scrollTop);
+                  const mn = pDoc.querySelector('section.main') || pDoc.querySelector('[data-testid="stMain"]');
+                  if (mn && mn.scrollTop) y = Math.max(y, mn.scrollTop);
+                } catch(e) {}
                 return y;
               }
 
@@ -1136,17 +1166,19 @@ def main():
                 });
 
                 if (heroIframe) {
-                  // Apple Keynote receding transform
-                  const p = Math.min(1, Math.max(0, scrollY / 600));
-                  const scale = 1 - (p * 0.12);
-                  const translateY = p * 60;
-                  const blur = p * 12;
-                  const opacity = 1 - (p * 0.70);
+                  // Apple Keynote receding 3D perspective transform
+                  const p = Math.min(1, Math.max(0, scrollY / 550));
+                  const scale = 1 - (p * 0.10);
+                  const translateY = p * 36;
+                  const translateZ = -p * 60;
+                  const rotateX = p * 3.5;
+                  const blur = p * 6;
+                  const opacity = 1 - (p * 0.55);
 
-                  heroIframe.style.setProperty('transform', `perspective(1000px) translateY(${translateY.toFixed(1)}px) scale(${scale.toFixed(4)})`, 'important');
+                  heroIframe.style.setProperty('transform', `perspective(1200px) translate3d(0, ${translateY.toFixed(1)}px, ${translateZ.toFixed(1)}px) rotateX(${rotateX.toFixed(2)}deg) scale(${scale.toFixed(4)})`, 'important');
                   heroIframe.style.setProperty('opacity', `${opacity.toFixed(3)}`, 'important');
                   heroIframe.style.setProperty('filter', `blur(${blur.toFixed(1)}px)`, 'important');
-                  heroIframe.style.setProperty('transform-origin', 'center top', 'important');
+                  heroIframe.style.setProperty('transform-origin', 'center 35%', 'important');
                   heroIframe.style.setProperty('will-change', 'transform, opacity, filter', 'important');
 
                   try {
@@ -1474,8 +1506,14 @@ def main():
         # ── Hero ──────────────────────────────────────────────────────────
         render_hero()
 
+        # ── Apple Keynote Sheet Header (Slides directly over hero) ────────
+        inject_html('''
+        <div class="keynote-sheet-header" id="about">
+          <div class="keynote-pill-handle"></div>
+        </div>
+        ''')
+
         # ── About ─────────────────────────────────────────────────────────
-        inject_html('<hr class="section-sep"/>')
         render_about()
 
         # ── Skills ────────────────────────────────────────────────────────

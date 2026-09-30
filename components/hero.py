@@ -857,15 +857,19 @@ let update3DTheme = null;
       my=(e.clientY/H-0.5)*2;
     }});
 
+    window._heroScrollOffset = 0;
     function animate(){{
       requestAnimationFrame(animate);
       const t=Date.now()*0.001;
-      sph.rotation.y=t*0.12;
-      sph.rotation.x=t*0.08;
-      ico.rotation.x=t*0.15;
-      ico.rotation.y=t*0.18;
-      camera.position.x+=(mx*0.5-camera.position.x)*0.04;
-      camera.position.y+=(-my*0.3-camera.position.y)*0.04;
+      const sy = window._heroScrollOffset || 0;
+      const sFac = sy * 0.003;
+      sph.rotation.y = t * 0.12 + sFac * 0.6;
+      sph.rotation.x = t * 0.08 + sFac * 0.4;
+      ico.rotation.x = t * 0.15 + sFac * 0.8;
+      ico.rotation.y = t * 0.18 + sFac * 0.7;
+      camera.position.x += (mx * 0.5 - camera.position.x) * 0.04;
+      camera.position.y += (-my * 0.3 - camera.position.y) * 0.04;
+      camera.position.z = 5 + Math.min(2.5, sFac * 1.5);
       camera.lookAt(scene.position);
       renderer.render(scene,camera);
     }}
@@ -933,17 +937,7 @@ let update3DTheme = null;
 (function initHeroScrollReceiver() {{
   window.addEventListener('message', function(e) {{
     if (e.data && e.data.type === 'HERO_SCROLL') {{
-      const sy = e.data.scrollY || 0;
-      const heroEl = document.getElementById('hero');
-      if (heroEl) {{
-        const scale = Math.max(0.85, 1 - sy * 0.00035);
-        const blur = Math.min(10, sy * 0.015);
-        const op = Math.max(0.1, 1 - sy * 0.0018);
-        heroEl.style.transform = `scale(${{scale.toFixed(4)}})`;
-        heroEl.style.filter = `blur(${{blur.toFixed(1)}}px)`;
-        heroEl.style.opacity = `${{op.toFixed(3)}}`;
-        heroEl.style.transformOrigin = 'center top';
-      }}
+      window._heroScrollOffset = e.data.scrollY || 0;
     }}
   }});
 }})();

@@ -316,7 +316,6 @@ def render_about():
     """
 
     inject_html(f"<style>{css}</style>")
-    inject_html('<div id="about"></div>')
 
     # Resume button link
     resume_link = get_download_link(resume_path, "Download Resume", "Kartikey_Gupta_Resume.pdf")
