@@ -12,15 +12,27 @@ import streamlit.components.v1 as components
 
 
 def _get_audio_source(asset_dir: str = "assets") -> str:
-    """Return base64 data URI if assets/music.mp3 exists, else high-reliability CDN link."""
-    local = os.path.join(asset_dir, "music.mp3")
-    if os.path.exists(local) and os.path.getsize(local) > 0:
-        try:
-            with open(local, "rb") as f:
-                b64 = base64.b64encode(f.read()).decode()
-            return f"data:audio/mpeg;base64,{b64}"
-        except Exception:
-            pass
+    """Return base64 data URI if custom uploaded song or assets/music.mp3 exists, else fallback CDN link."""
+    candidates = [
+        os.path.join(asset_dir, "music.mp3"),
+        os.path.join(asset_dir, "SONG.mpeg"),
+        os.path.join(asset_dir, "song.mpeg"),
+        "SONG.mpeg",
+        "song.mpeg",
+        os.path.join(asset_dir, "music.mpeg"),
+        os.path.join(asset_dir, "music.wav"),
+        os.path.join(asset_dir, "music.ogg"),
+    ]
+    for local in candidates:
+        if os.path.exists(local) and os.path.getsize(local) > 0:
+            try:
+                ext = os.path.splitext(local)[1].lower().lstrip(".")
+                mime = "audio/mpeg" if ext in ["mp3", "mpeg", "mpga"] else f"audio/{ext}"
+                with open(local, "rb") as f:
+                    b64 = base64.b64encode(f.read()).decode()
+                return f"data:{mime};base64,{b64}"
+            except Exception:
+                pass
     # High-reliability fallback royalty-free lofi stream
     return "https://cdn.pixabay.com/download/audio/2022/05/27/audio_1808fbf07a.mp3?filename=lofi-study-112191.mp3"
 
