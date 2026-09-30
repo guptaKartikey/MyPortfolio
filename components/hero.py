@@ -54,8 +54,8 @@ def render_hero():
     # Stats
     proj_count = len(load_projects().get("projects", []))
     cert_count = len(load_certificates().get("certificates", []))
-    proj_label = f"{max(proj_count, 2)}+"
-    cert_label = f"{max(cert_count, 3)}+"
+    proj_label = f"{max(proj_count, 9)}+"
+    cert_label = f"{max(cert_count, 5)}+"
 
     # Profile photo
     photo_path = profile.get("profile_image", "assets/profile/profile.jpg")
@@ -724,8 +724,8 @@ body.light-theme .btn-ghost:hover {{
       <div class="spec-card">
         <span class="spec-ico mono-tag">KG</span>
         <div>
-          <div class="spec-title">Full Stack Dev</div>
-          <div class="spec-sub">Modern web apps</div>
+          <div class="spec-title">Software Developer</div>
+          <div class="spec-sub">Software Development</div>
         </div>
       </div>
     </div>
@@ -880,19 +880,22 @@ let update3DTheme = null;
   }}
 }})();
 
-// ── Hero Stat Rolling Counters ─────────────────────────────────────────────
+// ── Hero Stat Rolling Counters (Scroll & Come Animation) ───────────────────
 (function initHeroCounters() {{
   try {{
     const stats = document.querySelectorAll('.stat-val');
-    stats.forEach(el => {{
-      const raw = el.textContent.trim();
+    function startCounter(el) {{
+      if (el._animating) return;
+      el._animating = true;
+      const raw = el.getAttribute('data-val') || el.textContent.trim();
+      el.setAttribute('data-val', raw);
       const match = raw.match(/^([0-9.]+)(.*)$/);
       if (match) {{
         const target = parseFloat(match[1]);
         const suffix = match[2] || '';
         const isFloat = match[1].includes('.');
         const decimals = isFloat ? (match[1].split('.')[1] || '').length : 0;
-        const duration = 1800;
+        const duration = 1600;
         const start = performance.now();
         el.textContent = (0).toFixed(decimals) + suffix;
 
@@ -903,11 +906,27 @@ let update3DTheme = null;
           const cur = target * eased;
           el.textContent = cur.toFixed(decimals) + suffix;
           if (progress < 1) requestAnimationFrame(tick);
-          else el.textContent = target.toFixed(decimals) + suffix;
+          else {{
+            el.textContent = target.toFixed(decimals) + suffix;
+            el._animating = false;
+          }}
         }}
-        setTimeout(() => requestAnimationFrame(tick), 350);
+        requestAnimationFrame(tick);
       }}
-    }});
+    }}
+
+    if (window.IntersectionObserver) {{
+      const obs = new IntersectionObserver((entries) => {{
+        entries.forEach(entry => {{
+          if (entry.isIntersecting) {{
+            startCounter(entry.target);
+          }}
+        }});
+      }}, {{ threshold: 0.2 }});
+      stats.forEach(el => obs.observe(el));
+    }} else {{
+      stats.forEach(el => startCounter(el));
+    }}
   }} catch(e) {{}}
 }})();
 

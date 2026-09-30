@@ -1396,7 +1396,7 @@ def main():
           /* ── 4. Rolling Number Counters ── */
           function setupAnimatedCounters(pDoc) {
             try {
-              const counterEls = pDoc.querySelectorAll('.stat-val, .stat-num, [data-counter-val]');
+              const counterEls = pDoc.querySelectorAll('.stat-val, .stat-num, .about-stat-val, [data-counter-val]');
               if (window.IntersectionObserver) {
                 const observer = new IntersectionObserver((entries) => {
                   entries.forEach(entry => {
