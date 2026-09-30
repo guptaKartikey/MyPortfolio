@@ -29,10 +29,12 @@ PROFILE_IMG_DIR  = ASSETS_DIR / "profile"
 PROJECT_IMG_DIR  = ASSETS_DIR / "projects"
 CERT_IMG_DIR     = ASSETS_DIR / "certificates"
 RESUME_DIR       = ASSETS_DIR / "resume"
+VIDEO_DIR        = ASSETS_DIR / "video"
 
 # JSON file paths
 PROFILE_FILE      = DATA_DIR / "profile.json"
 SKILLS_FILE       = DATA_DIR / "skills.json"
+PROJECT_FILE      = DATA_DIR / "projects.json"
 PROJECTS_FILE     = DATA_DIR / "projects.json"
 CERTIFICATES_FILE = DATA_DIR / "certificates.json"
 EXPERIENCE_FILE   = DATA_DIR / "experience.json"
@@ -47,6 +49,7 @@ def ensure_dirs() -> None:
         PROJECT_IMG_DIR,
         CERT_IMG_DIR,
         RESUME_DIR,
+        VIDEO_DIR,
     ]
     for d in dirs:
         d.mkdir(parents=True, exist_ok=True)
@@ -102,6 +105,8 @@ def load_profile() -> dict:
         "instagram": "",
         "resume_file": "assets/resume/resume.pdf",
         "profile_image": "assets/profile/profile.jpg",
+        "intro_video": "assets/video/intro_video.mp4",
+        "enable_intro_video": True,
         "interests": ["AI", "Machine Learning", "Software Development"],
     }
     data = load_json(PROFILE_FILE, defaults)

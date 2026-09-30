@@ -29,7 +29,7 @@ from utils.data_manager import (
     load_experience, save_experience,
     load_messages, save_messages,
     next_id,
-    PROFILE_IMG_DIR, PROJECT_IMG_DIR, CERT_IMG_DIR, RESUME_DIR,
+    PROFILE_IMG_DIR, PROJECT_IMG_DIR, CERT_IMG_DIR, RESUME_DIR, VIDEO_DIR,
 )
 from utils.helpers import inject_html, save_uploaded_file, is_placeholder
 
@@ -484,6 +484,78 @@ def _tab_experience():
                     st.rerun()
 
 
+def _tab_intro_video():
+    """Intro Video manager tab."""
+    st.markdown("### 🎬 Intro Video (Pull-Rope Experience)")
+    st.caption("This video plays in a cinematic frame when someone pulls the lamp rope on your intro preloader screen, with a top-right Skip button and dissolve/splash reveal.")
+
+    profile = load_profile()
+    current_video = profile.get("intro_video", "assets/video/intro_video.mp4")
+    enable_video = profile.get("enable_intro_video", True)
+
+    import os
+    from pathlib import Path
+
+    col1, col2 = st.columns([3, 2])
+    with col1:
+        st.markdown("#### ⚙️ Settings")
+        new_enable = st.toggle("Enable Intro Video on Entry", value=enable_video)
+        if new_enable != enable_video:
+            profile["enable_intro_video"] = new_enable
+            save_profile(profile)
+            st.toast(f"✅ Intro video {'enabled' if new_enable else 'disabled'}!", icon="✅")
+            st.rerun()
+
+        st.markdown("#### 📤 Upload New Video")
+        uploaded_video = st.file_uploader(
+            "Upload Intro Video (.mp4, .webm, .mov)",
+            type=["mp4", "webm", "mov", "m4v"],
+            key="intro_video_uploader",
+        )
+        if uploaded_video:
+            saved = save_uploaded_file(uploaded_video, str(VIDEO_DIR), "intro_video.mp4")
+            if saved:
+                profile["intro_video"] = "assets/video/intro_video.mp4"
+                profile["enable_intro_video"] = True
+                save_profile(profile)
+                st.toast("✅ Intro video uploaded and set successfully!", icon="✅")
+                st.rerun()
+            else:
+                st.error("❌ Video upload failed. Please check file permissions.")
+
+    with col2:
+        st.markdown("#### 📺 Current Video Preview")
+        video_exists = False
+        target_path = None
+        for p in [current_video, "assets/video/intro_video.mp4", "VIDEO.mp4"]:
+            if p and os.path.exists(p) and os.path.getsize(p) > 0:
+                target_path = p
+                video_exists = True
+                break
+
+        if video_exists and target_path:
+            size_mb = os.path.getsize(target_path) / (1024 * 1024)
+            st.success(f"🎬 Active Video: `{target_path}` ({size_mb:.1f} MB)")
+            try:
+                st.video(target_path)
+            except Exception:
+                st.info("Video file ready for web playback.")
+
+            if st.button("🗑️ Delete / Remove Video", type="secondary"):
+                try:
+                    if os.path.exists(target_path):
+                        os.remove(target_path)
+                except Exception:
+                    pass
+                profile["intro_video"] = ""
+                profile["enable_intro_video"] = False
+                save_profile(profile)
+                st.toast("🗑️ Intro video removed.", icon="✅")
+                st.rerun()
+        else:
+            st.warning("⚠️ No intro video currently set. Pulling the rope will directly open the website.")
+
+
 def _tab_resume():
     """Resume uploader tab."""
     st.markdown("### 📄 Resume")
@@ -573,6 +645,7 @@ def render_admin():
 
     tabs = st.tabs([
         "👤 Profile",
+        "🎬 Intro Video",
         "🛠️ Skills",
         "🚀 Projects",
         "🏆 Certificates",
@@ -582,9 +655,10 @@ def render_admin():
     ])
 
     with tabs[0]: _tab_profile()
-    with tabs[1]: _tab_skills()
-    with tabs[2]: _tab_projects()
-    with tabs[3]: _tab_certificates()
-    with tabs[4]: _tab_experience()
-    with tabs[5]: _tab_resume()
-    with tabs[6]: _tab_messages()
+    with tabs[1]: _tab_intro_video()
+    with tabs[2]: _tab_skills()
+    with tabs[3]: _tab_projects()
+    with tabs[4]: _tab_certificates()
+    with tabs[5]: _tab_experience()
+    with tabs[6]: _tab_resume()
+    with tabs[7]: _tab_messages()

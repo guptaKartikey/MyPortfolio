@@ -1,14 +1,17 @@
 """
 components/preloader.py
 =======================
-Cinematic intro splash preloader featuring the user's photo with updated laptop screen
-displaying "Welcome to My Portfolio Website" and an interactive lamp pull-rope reveal animation.
+Cinematic intro splash preloader featuring:
+1. Interactive lamp pull-rope reveal with banner photo.
+2. Smooth transition to widescreen cinematic video player (with top-right "Skip Intro ⏩" button).
+3. Dramatic dissolve & splash transition that reveals the website and triggers ambient music.
 """
 
-import streamlit as st
-import streamlit.components.v1 as components
-from pathlib import Path
+import os
 import base64
+from pathlib import Path
+import streamlit.components.v1 as components
+from utils.data_manager import load_profile
 
 
 def _get_intro_img_b64() -> str:
@@ -16,18 +19,47 @@ def _get_intro_img_b64() -> str:
     for p in ["assets/intro.jpg", "img.png", "assets/intro_banner.png"]:
         path = Path(p)
         if path.exists():
-            with open(path, "rb") as f:
-                return base64.b64encode(f.read()).decode("utf-8")
+            try:
+                with open(path, "rb") as f:
+                    return base64.b64encode(f.read()).decode("utf-8")
+            except Exception:
+                pass
+    return ""
+
+
+def _get_intro_video_b64() -> str:
+    """Load intro video in base64 if enabled and available."""
+    profile = load_profile()
+    if not profile.get("enable_intro_video", True):
+        return ""
+
+    candidates = [
+        profile.get("intro_video", ""),
+        "assets/video/intro_video.mp4",
+        "assets/VIDEO.mp4",
+        "VIDEO.mp4",
+        "assets/video/intro.mp4",
+    ]
+    for p in candidates:
+        if p and Path(p).exists() and Path(p).stat().st_size > 0:
+            try:
+                with open(p, "rb") as f:
+                    return base64.b64encode(f.read()).decode("utf-8")
+            except Exception:
+                pass
     return ""
 
 
 def render_preloader():
-    """Render the cinematic intro preloader overlay with interactive pull-rope."""
+    """Render the cinematic intro preloader overlay with video stage & dissolve splash."""
     img_b64 = _get_intro_img_b64()
     if not img_b64:
         return
 
-    # Injects the preloader directly into the top-level parent document
+    video_b64 = _get_intro_video_b64()
+    has_video_js = "true" if video_b64 else "false"
+    video_src_js = f'"data:video/mp4;base64,{video_b64}"' if video_b64 else '""'
+
     components.html(f"""
     <script>
     (function setupCinematicPreloader() {{
@@ -36,6 +68,9 @@ def render_preloader():
             if (pDoc.getElementById('intro-preloader-overlay')) {{
                 return; // already inserted
             }}
+
+            var hasVideo = {has_video_js};
+            var videoSrc = {video_src_js};
 
             var overlay = pDoc.createElement('div');
             overlay.id = 'intro-preloader-overlay';
@@ -48,20 +83,22 @@ def render_preloader():
                     width: 100vw !important;
                     height: 100vh !important;
                     z-index: 9999999999 !important;
-                    background: #030408 !important;
+                    background: #020308 !important;
                     display: flex !important;
                     align-items: center !important;
                     justify-content: center !important;
                     overflow: hidden !important;
-                    transition: transform 1.1s cubic-bezier(0.76, 0, 0.24, 1), opacity 0.6s ease 0.5s !important;
-                    will-change: transform, opacity !important;
+                    transition: opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1), filter 0.8s ease, transform 0.8s cubic-bezier(0.16, 1, 0.3, 1) !important;
+                    will-change: opacity, filter, transform !important;
                     user-select: none !important;
                     font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif !important;
                 }}
 
-                #intro-preloader-overlay.intro-dismissed {{
-                    transform: translateY(-100%) !important;
-                    opacity: 0.95 !important;
+                /* ── Dissolve & Splash Transition ── */
+                #intro-preloader-overlay.intro-dissolve {{
+                    opacity: 0 !important;
+                    filter: blur(35px) brightness(1.6) saturate(1.4) !important;
+                    transform: scale(1.08) !important;
                     pointer-events: none !important;
                 }}
 
@@ -69,13 +106,14 @@ def render_preloader():
                     position: absolute;
                     inset: 0;
                     background:
-                        radial-gradient(circle 800px at 20% 70%, rgba(0, 212, 255, 0.18) 0%, transparent 60%),
-                        radial-gradient(circle 700px at 80% 30%, rgba(168, 85, 247, 0.20) 0%, transparent 60%),
-                        radial-gradient(circle 500px at 50% 50%, rgba(245, 158, 11, 0.10) 0%, transparent 60%),
-                        #030408;
+                        radial-gradient(circle 800px at 20% 70%, rgba(0, 212, 255, 0.20) 0%, transparent 60%),
+                        radial-gradient(circle 700px at 80% 30%, rgba(168, 85, 247, 0.22) 0%, transparent 60%),
+                        radial-gradient(circle 500px at 50% 50%, rgba(245, 158, 11, 0.12) 0%, transparent 60%),
+                        #020308;
                     pointer-events: none;
                 }}
 
+                /* ── Stage 1: Photo Banner Frame ── */
                 .preloader-frame-wrap {{
                     position: relative;
                     width: 92vw;
@@ -88,6 +126,7 @@ def render_preloader():
                     border: 2px solid rgba(0, 212, 255, 0.35);
                     background: #000;
                     cursor: pointer;
+                    transition: opacity 0.5s ease, transform 0.5s ease;
                 }}
 
                 .preloader-main-img {{
@@ -168,7 +207,75 @@ def render_preloader():
                     100% {{ box-shadow: 0 0 22px rgba(245, 158, 11, 0.9); color: #ffffff; }}
                 }}
 
-                .preloader-skip-btn {{
+                /* ── Stage 2: Cinematic Video Player ── */
+                .preloader-video-stage {{
+                    position: absolute;
+                    inset: 0;
+                    display: none;
+                    align-items: center;
+                    justify-content: center;
+                    z-index: 200;
+                    background: #000000;
+                    opacity: 0;
+                    transition: opacity 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+                }}
+                .preloader-video-stage.video-active {{
+                    display: flex !important;
+                    opacity: 1 !important;
+                }}
+
+                .preloader-video-container {{
+                    position: relative;
+                    width: 90vw;
+                    max-width: 1200px;
+                    max-height: 85vh;
+                    aspect-ratio: 16 / 9;
+                    border-radius: 24px;
+                    overflow: hidden;
+                    box-shadow: 0 30px 90px rgba(0, 0, 0, 0.95), 0 0 60px rgba(0, 212, 255, 0.3), 0 0 100px rgba(168, 85, 247, 0.25);
+                    border: 2px solid rgba(0, 212, 255, 0.4);
+                    background: #000;
+                }}
+
+                .preloader-video-elem {{
+                    width: 100%;
+                    height: 100%;
+                    object-fit: cover;
+                    display: block;
+                    background: #000;
+                }}
+
+                /* ── Top-Right Glowing Skip Button ── */
+                .video-skip-btn {{
+                    position: fixed !important;
+                    top: 28px !important;
+                    right: 36px !important;
+                    z-index: 99999999999 !important;
+                    display: inline-flex !important;
+                    align-items: center !important;
+                    gap: 10px !important;
+                    padding: 12px 28px !important;
+                    border-radius: 50px !important;
+                    background: rgba(10, 12, 28, 0.88) !important;
+                    border: 1.5px solid rgba(0, 212, 255, 0.55) !important;
+                    color: #ffffff !important;
+                    font-size: 0.92rem !important;
+                    font-weight: 800 !important;
+                    letter-spacing: 0.5px !important;
+                    cursor: pointer !important;
+                    backdrop-filter: blur(18px) !important;
+                    -webkit-backdrop-filter: blur(18px) !important;
+                    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.6), 0 0 25px rgba(0, 212, 255, 0.4) !important;
+                    transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1) !important;
+                }}
+                .video-skip-btn:hover {{
+                    transform: translateY(-2px) scale(1.04) !important;
+                    background: linear-gradient(135deg, rgba(0, 212, 255, 0.35), rgba(168, 85, 247, 0.35)) !important;
+                    border-color: #00d4ff !important;
+                    box-shadow: 0 10px 35px rgba(0, 212, 255, 0.7), 0 0 30px rgba(168, 85, 247, 0.5) !important;
+                }}
+
+                .preloader-bottom-enter-btn {{
                     position: absolute;
                     bottom: 24px;
                     right: 32px;
@@ -188,49 +295,89 @@ def render_preloader():
                     z-index: 100;
                     box-shadow: 0 4px 20px rgba(0, 212, 255, 0.25);
                 }}
-                .preloader-skip-btn:hover {{
+                .preloader-bottom-enter-btn:hover {{
                     background: linear-gradient(135deg, rgba(0, 212, 255, 0.35), rgba(168, 85, 247, 0.35));
                     border-color: #00d4ff;
                     transform: translateY(-2px);
                     box-shadow: 0 6px 25px rgba(0, 212, 255, 0.5);
                 }}
 
+                /* ── Animated Splash Ripple Wave Effect ── */
+                .splash-ripple-wave {{
+                    position: absolute;
+                    top: 50%;
+                    left: 50%;
+                    width: 10px;
+                    height: 10px;
+                    margin-top: -5px;
+                    margin-left: -5px;
+                    border-radius: 50%;
+                    background: radial-gradient(circle, rgba(0, 212, 255, 0.9) 0%, rgba(168, 85, 247, 0.75) 40%, transparent 75%);
+                    pointer-events: none;
+                    opacity: 0;
+                    z-index: 300;
+                }}
+                .splash-ripple-wave.splash-animate {{
+                    animation: rippleExpand 0.9s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+                }}
+                @keyframes rippleExpand {{
+                    0% {{ transform: scale(1); opacity: 0.95; }}
+                    100% {{ transform: scale(350); opacity: 0; }}
+                }}
+
                 @media (max-width: 768px) {{
                     .lamp-rope-container {{ right: 15px; }}
                     .lamp-cord {{ height: 85px; }}
-                    .preloader-skip-btn {{ bottom: 12px; right: 16px; padding: 6px 16px; font-size: 0.75rem; }}
+                    .video-skip-btn {{ top: 16px; right: 16px; padding: 8px 18px; font-size: 0.80rem; }}
+                    .preloader-bottom-enter-btn {{ bottom: 12px; right: 16px; padding: 6px 16px; font-size: 0.75rem; }}
                 }}
                 </style>
 
                 <div class="preloader-ambient-bg"></div>
 
-                <!-- Hanging Lamp Pull Rope -->
+                <!-- Stage 1: Hanging Lamp Pull Rope & Banner Photo -->
                 <div class="lamp-rope-container" id="lamp-rope-trigger" title="Pull rope to enter!">
                     <div class="lamp-cord"></div>
                     <div class="lamp-handle">&#128161;</div>
                     <div class="lamp-rope-tag">&#10024; Pull Rope to Enter</div>
                 </div>
 
-                <!-- Central Photo Container (No HTML overlay in front of laptop) -->
-                <div class="preloader-frame-wrap" id="preloader-photo-frame" title="Click anywhere to enter portfolio">
+                <div class="preloader-frame-wrap" id="preloader-photo-frame" title="Click anywhere to enter">
                     <img src="data:image/jpeg;base64,{img_b64}" alt="Kartikey Gupta Portfolio" class="preloader-main-img" />
                 </div>
 
-                <!-- Bottom Enter Button -->
-                <button class="preloader-skip-btn" id="preloader-skip-trigger">
+                <button class="preloader-bottom-enter-btn" id="preloader-enter-trigger">
                     <span>Enter Portfolio</span> &rarr;
                 </button>
+
+                <!-- Stage 2: Fullscreen Cinematic Video Player with Skip Button in Right Corner -->
+                <div class="preloader-video-stage" id="preloader-video-stage">
+                    <button class="video-skip-btn" id="video-skip-btn" title="Skip Intro & Enter">
+                        <span>Skip Intro</span> &nbsp;⏩
+                    </button>
+                    <div class="preloader-video-container">
+                        <video class="preloader-video-elem" id="preloader-video-elem" playsinline preload="auto">
+                        </video>
+                    </div>
+                </div>
+
+                <!-- Stage 3: Splash Ripple Wave -->
+                <div class="splash-ripple-wave" id="splash-ripple-wave"></div>
             `;
 
             pDoc.body.appendChild(overlay);
 
             var ropeTrigger = pDoc.getElementById('lamp-rope-trigger');
-            var skipTrigger = pDoc.getElementById('preloader-skip-trigger');
+            var enterTrigger = pDoc.getElementById('preloader-enter-trigger');
             var photoFrame = pDoc.getElementById('preloader-photo-frame');
+            var videoStage = pDoc.getElementById('preloader-video-stage');
+            var videoElem = pDoc.getElementById('preloader-video-elem');
+            var skipBtn = pDoc.getElementById('video-skip-btn');
+            var splashWave = pDoc.getElementById('splash-ripple-wave');
 
             var isDismissed = false;
 
-            function startMusic() {{
+            function startBackgroundMusic() {{
                 try {{
                     function tryPlay() {{
                         var audio = (window.parent && window.parent.document ? window.parent.document.getElementById('portfolio-audio-elem') : null) || document.getElementById('portfolio-audio-elem');
@@ -260,47 +407,96 @@ def render_preloader():
                 }}
             }}
 
-            function pullAndDismiss() {{
+            /* ── Dissolve & Splash Reveal Website ── */
+            function executeDissolveAndSplash() {{
                 if (isDismissed) return;
                 isDismissed = true;
 
-                // Automatically start ambient music on user gesture
-                startMusic();
-
-                // Animate pull stretch
-                if (ropeTrigger) {{
-                    ropeTrigger.classList.add('pulled');
+                // Stop video if running
+                if (videoElem) {{
+                    try {{ videoElem.pause(); }} catch(e) {{}}
                 }}
 
-                // Slide curtain upwards smoothly
+                // Start ambient background music
+                startBackgroundMusic();
+
+                // Trigger glowing ripple splash wave
+                if (splashWave) {{
+                    splashWave.classList.add('splash-animate');
+                }}
+
+                // Dissolve overlay with blur & splash
                 setTimeout(function() {{
                     if (overlay) {{
-                        overlay.classList.add('intro-dismissed');
+                        overlay.classList.add('intro-dissolve');
                         setTimeout(function() {{
                             if (overlay.parentNode) {{
                                 overlay.parentNode.removeChild(overlay);
                             }}
-                        }}, 1200);
+                        }}, 850);
                     }}
-                }}, 220);
+                }}, 150);
+            }}
+
+            /* ── Handle Pull Rope Click ── */
+            function onRopePulled() {{
+                if (ropeTrigger) {{
+                    ropeTrigger.classList.add('pulled');
+                }}
+
+                if (hasVideo && videoSrc && videoStage && videoElem) {{
+                    // Transition from photo to Video Stage
+                    setTimeout(function() {{
+                        if (photoFrame) photoFrame.style.display = 'none';
+                        if (ropeTrigger) ropeTrigger.style.display = 'none';
+                        if (enterTrigger) enterTrigger.style.display = 'none';
+
+                        videoStage.classList.add('video-active');
+                        videoElem.src = videoSrc;
+                        videoElem.volume = 0.85;
+                        var playPromise = videoElem.play();
+                        if (playPromise !== undefined) {{
+                            playPromise.catch(function(e) {{
+                                console.log('Video autoplay error:', e);
+                            }});
+                        }}
+
+                        // When video ends naturally, trigger dissolve and splash
+                        videoElem.addEventListener('ended', function() {{
+                            executeDissolveAndSplash();
+                        }});
+                    }}, 250);
+                }} else {{
+                    // No video configured: directly dissolve & splash
+                    setTimeout(function() {{
+                        executeDissolveAndSplash();
+                    }}, 250);
+                }}
             }}
 
             if (ropeTrigger) {{
                 ropeTrigger.addEventListener('click', function(e) {{
                     e.preventDefault();
-                    pullAndDismiss();
+                    onRopePulled();
                 }});
             }}
-            if (skipTrigger) {{
-                skipTrigger.addEventListener('click', function(e) {{
+            if (enterTrigger) {{
+                enterTrigger.addEventListener('click', function(e) {{
                     e.preventDefault();
-                    pullAndDismiss();
+                    onRopePulled();
                 }});
             }}
             if (photoFrame) {{
                 photoFrame.addEventListener('click', function(e) {{
                     e.preventDefault();
-                    pullAndDismiss();
+                    onRopePulled();
+                }});
+            }}
+            if (skipBtn) {{
+                skipBtn.addEventListener('click', function(e) {{
+                    e.preventDefault();
+                    e.stopPropagation();
+                    executeDissolveAndSplash();
                 }});
             }}
 
