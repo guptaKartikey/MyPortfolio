@@ -739,69 +739,16 @@ body.light-theme::before {
   box-shadow: 0 8px 25px rgba(2, 132, 199, 0.08) !important;
 }
 
-/* ── Premium Stacking & Layering (Apple Keynote Effect) ── */
-#home {
+/* ── Section Anchors & Smooth Scroll Fade Styling ── */
+#home, #about, #skills, #projects, #experience, #certificates, #contact {
+  scroll-margin-top: 80px;
   position: relative;
-  z-index: 1;
 }
 
-/* ── Hero Sticky Parallax Layer (Apple Stacking) ── */
 div[data-testid="stCustomComponentV1"]:has(iframe[height="600"]),
-div[data-testid="stCustomComponentV1"]:has(iframe[style*="height: 600px"]),
-div[data-testid="stElementContainer"]:has(iframe[height="600"]),
-div[data-testid="stElementContainer"]:has(iframe[style*="height: 600px"]) {
-  position: -webkit-sticky !important;
-  position: sticky !important;
-  top: 64px !important;
-  z-index: 1 !important;
-  margin-bottom: 0 !important;
+div[data-testid="stElementContainer"]:has(iframe[height="600"]) {
+  margin-bottom: 20px !important;
   will-change: transform, opacity, filter !important;
-}
-
-/* ── Content Sections Slide Directly Over Sticky Hero (Keynote Stack Sheet) ── */
-div[data-testid="stElementContainer"]:has(iframe[height="600"]) ~ div[data-testid="stElementContainer"],
-div[data-testid="stElementContainer"]:has(iframe[height="600"]) ~ div[data-testid="stHorizontalBlock"],
-div[data-testid="stElementContainer"]:has(iframe[height="600"]) ~ div[data-testid="stVerticalBlock"] {
-  position: relative !important;
-  z-index: 10 !important;
-}
-
-.keynote-sheet-header {
-  scroll-margin-top: 80px;
-  position: relative !important;
-  z-index: 10 !important;
-  background: #000000 !important;
-  border-top-left-radius: 40px !important;
-  border-top-right-radius: 40px !important;
-  border-top: 1.5px solid rgba(0, 212, 255, 0.4) !important;
-  box-shadow: 0 -35px 80px rgba(0, 0, 0, 0.98), 0 -4px 25px rgba(0, 212, 255, 0.25) !important;
-  padding: 24px 0 12px !important;
-  margin-top: 24px !important;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  gap: 8px;
-}
-
-.light-theme .keynote-sheet-header {
-  background: #f8fafc !important;
-  border-top: 1.5px solid rgba(2, 132, 199, 0.4) !important;
-  box-shadow: 0 -30px 70px rgba(0, 0, 0, 0.12), 0 -4px 20px rgba(2, 132, 199, 0.18) !important;
-}
-
-.keynote-pill-handle {
-  width: 54px;
-  height: 5px;
-  border-radius: 10px;
-  background: linear-gradient(90deg, #00d4ff, #a855f7);
-  box-shadow: 0 0 12px rgba(0, 212, 255, 0.6);
-}
-
-#about, #skills, #projects, #experience, #certificates, #contact {
-  position: relative !important;
-  z-index: 10 !important;
-  scroll-margin-top: 80px;
 }
 
 /* Card 3D perspective enhancements */
@@ -1134,11 +1081,11 @@ def main():
             } catch(e) {}
           }
 
-          /* ── 1. 3D Scroll Parallax & Hero Stacking (Apple Keynote Effect) ── */
-          function setup3DScrollParallax(pDoc) {
+          /* ── 1. ALL-SECTIONS 3D SCROLL FADE & PARALLAX ENGINE ── */
+          function setupAllSectionsScrollFade(pDoc) {
             try {
-              if (pDoc._parallaxBound) return;
-              pDoc._parallaxBound = true;
+              if (pDoc._scrollFadeBound) return;
+              pDoc._scrollFadeBound = true;
 
               function getScroll() {
                 let y = 0;
@@ -1155,8 +1102,11 @@ def main():
                 return y;
               }
 
-              function updateParallax() {
+              function updateSectionFades() {
                 const scrollY = getScroll();
+                const vh = window.parent ? window.parent.innerHeight : window.innerHeight;
+
+                // 1. Hero Iframe Fade & Parallax
                 const iframes = pDoc.querySelectorAll('iframe');
                 let heroIframe = null;
                 iframes.forEach(f => {
@@ -1166,25 +1116,80 @@ def main():
                 });
 
                 if (heroIframe) {
-                  // Apple Keynote receding 3D perspective transform
-                  const p = Math.min(1, Math.max(0, scrollY / 550));
+                  const p = Math.min(1, Math.max(0, scrollY / 460));
                   const scale = 1 - (p * 0.10);
-                  const translateY = p * 36;
-                  const translateZ = -p * 60;
-                  const rotateX = p * 3.5;
-                  const blur = p * 6;
-                  const opacity = 1 - (p * 0.55);
+                  const translateY = p * 35;
+                  const blur = p * 5;
+                  const opacity = Math.max(0, 1 - (p * 0.85));
 
-                  heroIframe.style.setProperty('transform', `perspective(1200px) translate3d(0, ${translateY.toFixed(1)}px, ${translateZ.toFixed(1)}px) rotateX(${rotateX.toFixed(2)}deg) scale(${scale.toFixed(4)})`, 'important');
+                  heroIframe.style.setProperty('transform', `perspective(1000px) translateY(${translateY.toFixed(1)}px) scale(${scale.toFixed(4)})`, 'important');
                   heroIframe.style.setProperty('opacity', `${opacity.toFixed(3)}`, 'important');
                   heroIframe.style.setProperty('filter', `blur(${blur.toFixed(1)}px)`, 'important');
-                  heroIframe.style.setProperty('transform-origin', 'center 35%', 'important');
+                  heroIframe.style.setProperty('transform-origin', 'center top', 'important');
                   heroIframe.style.setProperty('will-change', 'transform, opacity, filter', 'important');
 
                   try {
                     heroIframe.contentWindow.postMessage({ type: 'HERO_SCROLL', scrollY: scrollY }, '*');
                   } catch(err) {}
                 }
+
+                // 2. All Other Major Sections & Card Containers Fade In/Out
+                const sectionSelectors = [
+                  '.about-profile-card-3d',
+                  '.who-i-am-card-3d',
+                  '.edu-card-3d',
+                  '.interests-section-3d',
+                  '.skills-header-container',
+                  '.skill-card-img2',
+                  '.projects-header-container',
+                  '.project-card-3d',
+                  '.exp-header-container',
+                  '.timeline-item',
+                  '.cert-header-container',
+                  '.cert-card-3d',
+                  '.contact-header-container',
+                  '.contact-info-card-3d',
+                  '.contact-form-3d',
+                  '.portfolio-footer'
+                ];
+
+                const targets = pDoc.querySelectorAll(sectionSelectors.join(', '));
+                targets.forEach(el => {
+                  const rect = el.getBoundingClientRect();
+                  const elTop = rect.top;
+                  const elBottom = rect.bottom;
+                  const elHeight = rect.height || 220;
+
+                  let opacity = 1;
+                  let scale = 1;
+                  let translateY = 0;
+                  let blur = 0;
+
+                  // Top exit fade (scrolling above viewport header zone)
+                  if (elTop < 75) {
+                    const exitProgress = Math.min(1, Math.max(0, (75 - elTop) / (elHeight * 0.85 || 240)));
+                    opacity = Math.max(0.08, 1 - (exitProgress * 0.88));
+                    scale = 1 - (exitProgress * 0.06);
+                    translateY = exitProgress * 22;
+                    blur = exitProgress * 4;
+                  }
+                  // Bottom enter fade (entering from bottom of screen)
+                  else if (elBottom > vh - 40) {
+                    const distFromBottom = elTop - (vh - 40);
+                    if (distFromBottom > 0) {
+                      const enterProgress = Math.min(1, Math.max(0, distFromBottom / 260));
+                      opacity = Math.max(0.1, 1 - (enterProgress * 0.9));
+                      scale = 1 - (enterProgress * 0.05);
+                      translateY = enterProgress * 24;
+                      blur = enterProgress * 3;
+                    }
+                  }
+
+                  el.style.setProperty('transform', `perspective(1000px) translateY(${translateY.toFixed(1)}px) scale(${scale.toFixed(4)})`, 'important');
+                  el.style.setProperty('opacity', `${opacity.toFixed(3)}`, 'important');
+                  el.style.setProperty('filter', `blur(${blur.toFixed(1)}px)`, 'important');
+                  el.style.setProperty('will-change', 'transform, opacity, filter', 'important');
+                });
               }
 
               const scrollTargets = [
@@ -1197,10 +1202,10 @@ def main():
               ];
               scrollTargets.forEach(t => {
                 if (t && t.addEventListener) {
-                  t.addEventListener('scroll', updateParallax, { passive: true });
+                  t.addEventListener('scroll', updateSectionFades, { passive: true });
                 }
               });
-              setInterval(updateParallax, 40);
+              setInterval(updateSectionFades, 40);
             } catch(e) {}
           }
 
@@ -1486,7 +1491,7 @@ def main():
               const pDoc = window.parent.document;
               setupButtonListener();
               setupNavLinksAndScrollSpy();
-              setup3DScrollParallax(pDoc);
+              setupAllSectionsScrollFade(pDoc);
               setup3DCardTilt(pDoc);
               setupFluidCursor(pDoc);
               setupAnimatedCounters(pDoc);
@@ -1506,14 +1511,8 @@ def main():
         # ── Hero ──────────────────────────────────────────────────────────
         render_hero()
 
-        # ── Apple Keynote Sheet Header (Slides directly over hero) ────────
-        inject_html('''
-        <div class="keynote-sheet-header" id="about">
-          <div class="keynote-pill-handle"></div>
-        </div>
-        ''')
-
         # ── About ─────────────────────────────────────────────────────────
+        inject_html('<div id="about" style="scroll-margin-top:80px;position:relative;"></div><hr class="section-sep"/>')
         render_about()
 
         # ── Skills ────────────────────────────────────────────────────────
