@@ -47,8 +47,7 @@ MESSAGES_FILE     = DATA_DIR / "messages.json"
 
 
 def ensure_dirs() -> None:
-    """Create all required folders if they don't already exist and sync static files."""
-    import shutil
+    """Create all required folders if they don't already exist."""
     dirs = [
         DATA_DIR,
         PROFILE_IMG_DIR,
@@ -63,14 +62,6 @@ def ensure_dirs() -> None:
     for d in dirs:
         d.mkdir(parents=True, exist_ok=True)
 
-    # Sync assets into static for fast native streaming
-    try:
-        for vid in VIDEO_DIR.glob("*.mp4"):
-            dest = STATIC_VIDEO_DIR / vid.name
-            if not dest.exists() or dest.stat().st_size != vid.stat().st_size:
-                shutil.copy2(vid, dest)
-    except Exception:
-        pass
 
 
 
