@@ -24,5 +24,9 @@
     "Web Development",
     "Computer Vision",
     "Generative AI"
-  ]
+  ],
+  "showcase_video": "assets/video/vid_1.mp4",
+  "enable_showcase_video": true,
+  "showcase_title": "Cinematic Showcase",
+  "showcase_subtitle": "Featured Highlights & Visual Reel"
 }

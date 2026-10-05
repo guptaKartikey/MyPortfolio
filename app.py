@@ -43,6 +43,7 @@ from components.skills       import render_skills
 from components.projects     import render_projects
 from components.experience   import render_experience
 from components.certificates import render_certificates
+from components.video_showcase import render_video_showcase
 from components.contact      import render_contact
 from components.admin        import render_admin
 from components.preloader    import render_preloader
@@ -795,6 +796,7 @@ NAV_HTML = """
       <li><a href="#projects" data-target="projects"><span class="nav-icon">💻</span><span class="nav-text">Projects</span></a></li>
       <li><a href="#experience" data-target="experience"><span class="nav-icon">💼</span><span class="nav-text">Experience</span></a></li>
       <li><a href="#certificates" data-target="certificates"><span class="nav-icon">📜</span><span class="nav-text">Certificates</span></a></li>
+      <li><a href="#video-showcase" data-target="video-showcase"><span class="nav-icon">🎬</span><span class="nav-text">Showcase</span></a></li>
       <li><a href="#contact" data-target="contact"><span class="nav-icon">📬</span><span class="nav-text">Contact</span></a></li>
     </ul>
     <div class="nav-actions">
@@ -1046,7 +1048,7 @@ def main():
                 // ScrollSpy observer
                 if (scrollContainer && !scrollContainer.dataset.spyBound) {
                   scrollContainer.dataset.spyBound = 'true';
-                  const sections = ['contact', 'certificates', 'experience', 'projects', 'skills', 'about', 'home'];
+                  const sections = ['contact', 'video-showcase', 'certificates', 'experience', 'projects', 'skills', 'about', 'home'];
                   
                   function updateActiveNav() {
                     let activeId = '';
@@ -1451,6 +1453,7 @@ def main():
                 .project-card-3d,
                 .timeline-item,
                 .cert-card-3d,
+                .cinematic-video-wrapper,
                 .contact-card-3d,
                 .contact-form-3d
               `);
@@ -1530,6 +1533,10 @@ def main():
         # ── Certificates ──────────────────────────────────────────────────
         inject_html('<hr class="section-sep"/>')
         render_certificates()
+
+        # ── Video Showcase (Full-Screen Cinematic Reel) ───────────────────
+        inject_html('<div id="video-showcase" style="scroll-margin-top:80px;position:relative;"></div><hr class="section-sep"/>')
+        render_video_showcase()
 
         # ── Contact ───────────────────────────────────────────────────────
         inject_html('<hr class="section-sep"/>')

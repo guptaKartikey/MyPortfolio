@@ -556,6 +556,80 @@ def _tab_intro_video():
             st.warning("⚠️ No intro video currently set. Pulling the rope will directly open the website.")
 
 
+def _tab_showcase_video():
+    """Showcase Video manager tab (between Certificates and Contact)."""
+    st.markdown("### 🎥 Full-Screen Showcase Video")
+    st.caption("This video appears in the full-screen cinematic section between Certificates and Contact. It automatically plays when visitors scroll to it, and stops when they scroll down to Contact or up away.")
+
+    profile = load_profile()
+    current_video = profile.get("showcase_video", "assets/video/vid_1.mp4")
+    enable_video = profile.get("enable_showcase_video", True)
+    title = profile.get("showcase_title", "Cinematic Showcase")
+    subtitle = profile.get("showcase_subtitle", "Featured Highlights & Visual Reel")
+
+    import os
+    from pathlib import Path
+
+    col1, col2 = st.columns([3, 2])
+    with col1:
+        st.markdown("#### ⚙️ Section Settings")
+        new_enable = st.toggle("Enable Showcase Video Section", value=enable_video, key="showcase_enable_toggle")
+        new_title = st.text_input("Section Title", value=title, key="showcase_title_input")
+        new_subtitle = st.text_input("Section Subtitle / Description", value=subtitle, key="showcase_subtitle_input")
+
+        if st.button("💾 Save Showcase Settings", key="save_showcase_settings"):
+            profile["enable_showcase_video"] = new_enable
+            profile["showcase_title"] = new_title
+            profile["showcase_subtitle"] = new_subtitle
+            save_profile(profile)
+            st.toast("✅ Showcase settings saved!", icon="✅")
+            st.rerun()
+
+        st.markdown("---")
+        st.markdown("#### 📤 Upload / Replace Showcase Video")
+        uploaded_video = st.file_uploader(
+            "Upload Showcase Video (.mp4, .webm, .mov)",
+            type=["mp4", "webm", "mov", "m4v"],
+            key="showcase_video_uploader",
+        )
+        if uploaded_video:
+            saved = save_uploaded_file(uploaded_video, str(VIDEO_DIR), "vid_1.mp4")
+            if saved:
+                profile["showcase_video"] = "assets/video/vid_1.mp4"
+                profile["enable_showcase_video"] = True
+                save_profile(profile)
+                st.toast("✅ Showcase video uploaded and updated successfully!", icon="✅")
+                st.rerun()
+            else:
+                st.error("❌ Video upload failed. Please check file permissions.")
+
+    with col2:
+        st.markdown("#### 📺 Active Video Preview")
+        video_exists = False
+        target_path = None
+        for p in [current_video, "assets/video/vid_1.mp4", "vid_1.mp4", "portfolio/assets/video/vid_1.mp4"]:
+            if p and os.path.exists(p) and os.path.getsize(p) > 0:
+                target_path = p
+                video_exists = True
+                break
+
+        if video_exists and target_path:
+            size_mb = os.path.getsize(target_path) / (1024 * 1024)
+            st.success(f"🎬 Active Showcase: `{target_path}` ({size_mb:.1f} MB)")
+            try:
+                st.video(target_path)
+            except Exception:
+                st.info("Video file ready for web playback.")
+
+            if st.button("🗑️ Reset / Disable Showcase Video", type="secondary", key="del_showcase_vid"):
+                profile["enable_showcase_video"] = False
+                save_profile(profile)
+                st.toast("🗑️ Showcase video disabled.", icon="✅")
+                st.rerun()
+        else:
+            st.warning("⚠️ No showcase video file found. Upload a video to activate.")
+
+
 def _tab_resume():
     """Resume uploader tab."""
     st.markdown("### 📄 Resume")
@@ -645,7 +719,8 @@ def render_admin():
 
     tabs = st.tabs([
         "👤 Profile",
-        "🎬 Intro Video",
+        "🎥 Showcase Video",
+        "✨ Intro Video",
         "🛠️ Skills",
         "🚀 Projects",
         "🏆 Certificates",
@@ -655,10 +730,11 @@ def render_admin():
     ])
 
     with tabs[0]: _tab_profile()
-    with tabs[1]: _tab_intro_video()
-    with tabs[2]: _tab_skills()
-    with tabs[3]: _tab_projects()
-    with tabs[4]: _tab_certificates()
-    with tabs[5]: _tab_experience()
-    with tabs[6]: _tab_resume()
-    with tabs[7]: _tab_messages()
+    with tabs[1]: _tab_showcase_video()
+    with tabs[2]: _tab_intro_video()
+    with tabs[3]: _tab_skills()
+    with tabs[4]: _tab_projects()
+    with tabs[5]: _tab_certificates()
+    with tabs[6]: _tab_experience()
+    with tabs[7]: _tab_resume()
+    with tabs[8]: _tab_messages()

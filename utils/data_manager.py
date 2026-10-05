@@ -107,6 +107,10 @@ def load_profile() -> dict:
         "profile_image": "assets/profile/profile.jpg",
         "intro_video": "assets/video/intro_video.mp4",
         "enable_intro_video": True,
+        "showcase_video": "assets/video/vid_1.mp4",
+        "enable_showcase_video": True,
+        "showcase_title": "Cinematic Showcase",
+        "showcase_subtitle": "Featured Highlights & Visual Reel",
         "interests": ["AI", "Machine Learning", "Software Development"],
     }
     data = load_json(PROFILE_FILE, defaults)
