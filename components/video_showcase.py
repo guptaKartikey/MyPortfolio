@@ -4,10 +4,10 @@ components/video_showcase.py
 ============================
 Cinematic Full-Screen Video Showcase Section placed between Certificates and Contact.
 Features:
-- Fullscreen immersive player rendered via components.html for 100% reliable execution.
+- Pure clean full-screen widescreen video player (without header text clutter).
 - Scroll-synced auto-playback: Automatically plays when entering viewport,
   pauses when scrolling down to Contact or scrolling up above.
-- Interactive HUD: Play/Pause, Mute/Unmute, Fullscreen toggle, progress seek bar.
+- Floating glassmorphic HUD: Play/Pause, Mute/Unmute, Fullscreen, progress seek bar.
 - Admin customizable via profile data.
 """
 
@@ -53,19 +53,12 @@ def render_video_showcase():
     if not video_b64:
         return
 
-    title = profile.get("showcase_title", "Cinematic Showcase")
-    subtitle = profile.get("showcase_subtitle", "Featured Visual Highlights & Project Demo Reel")
-
-    title_parts = title.split(" ", 1)
-    title_first = title_parts[0] if title_parts else "Cinematic"
-    title_rest = title_parts[1] if len(title_parts) > 1 else "Showcase"
-
     html_content = f"""<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;600;700&family=Caveat:wght@600;700&display=swap"/>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;600;700&display=swap"/>
 <style>
 * {{
     box-sizing: border-box;
@@ -73,125 +66,52 @@ def render_video_showcase():
     padding: 0;
 }}
 
-body {{
+html, body {{
     background: transparent;
     font-family: 'Inter', system-ui, -apple-system, sans-serif;
     color: #e2e8f0;
     overflow: hidden;
-    padding: 10px 14px 20px;
+    padding: 0;
+    margin: 0;
     width: 100%;
-    margin: 0 auto;
+    height: 100%;
 }}
 
 .showcase-container {{
-    max-width: 1300px;
+    width: 100%;
+    max-width: 1400px;
     margin: 0 auto;
+    padding: 10px 0 20px;
+    height: 100%;
     display: flex;
     flex-direction: column;
-    gap: 16px;
+    justify-content: center;
 }}
 
-/* ── Section Header ── */
-.video-header {{
-    position: relative;
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-}}
-
-.video-badge {{
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    padding: 5px 16px;
-    border-radius: 50px;
-    background: rgba(0, 212, 255, 0.08);
-    border: 1px solid rgba(0, 212, 255, 0.3);
-    color: #00d4ff;
-    font-size: 0.72rem;
-    font-weight: 700;
-    letter-spacing: 1.5px;
-    text-transform: uppercase;
-    margin-bottom: 8px;
-    box-shadow: 0 0 15px rgba(0, 212, 255, 0.12);
-}}
-
-.badge-pulse {{
-    width: 7px;
-    height: 7px;
-    border-radius: 50%;
-    background: #00d4ff;
-    box-shadow: 0 0 8px #00d4ff;
-    animation: pulse 1.6s infinite ease-in-out;
-}}
-
-@keyframes pulse {{
-    0%, 100% {{ transform: scale(1); opacity: 1; }}
-    50% {{ transform: scale(1.4); opacity: 0.4; }}
-}}
-
-.video-title {{
-    font-size: clamp(1.8rem, 3.2vw, 2.5rem);
-    font-weight: 900;
-    color: #ffffff;
-    letter-spacing: -0.5px;
-    line-height: 1.1;
-    margin-bottom: 6px;
-}}
-
-.video-title-accent {{
-    background: linear-gradient(135deg, #00d4ff 0%, #a855f7 50%, #f43f5e 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-}}
-
-.video-subtitle {{
-    color: #94a3b8;
-    font-size: 0.90rem;
-    max-width: 600px;
-    line-height: 1.5;
-}}
-
-.video-handwritten {{
-    position: absolute;
-    right: 20px;
-    top: 5px;
-    font-family: 'Caveat', cursive;
-    font-size: 1.45rem;
-    color: #00d4ff;
-    transform: rotate(-3deg);
-    opacity: 0.95;
-    text-shadow: 0 0 12px rgba(0, 212, 255, 0.4);
-}}
-
-@media (max-width: 768px) {{
-    .video-handwritten {{ display: none; }}
-}}
-
-/* ── Cinematic Video Frame ── */
+/* ── Massive Cinematic Video Frame ── */
 .cinematic-frame {{
     position: relative;
     width: 100%;
-    border-radius: 22px;
+    height: calc(100% - 20px);
+    min-height: 580px;
+    border-radius: 26px;
     padding: 3px;
-    background: linear-gradient(135deg, rgba(0, 212, 255, 0.45), rgba(168, 85, 247, 0.35), rgba(244, 63, 94, 0.35));
-    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.8), 0 0 35px rgba(0, 212, 255, 0.18), 0 0 60px rgba(168, 85, 247, 0.12);
+    background: linear-gradient(135deg, rgba(0, 212, 255, 0.5), rgba(168, 85, 247, 0.4), rgba(244, 63, 94, 0.4));
+    box-shadow: 0 25px 80px rgba(0, 0, 0, 0.85), 0 0 45px rgba(0, 212, 255, 0.22), 0 0 75px rgba(168, 85, 247, 0.16);
     transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
 }}
 
 .cinematic-frame:hover {{
-    box-shadow: 0 25px 75px rgba(0, 0, 0, 0.9), 0 0 50px rgba(0, 212, 255, 0.30), 0 0 80px rgba(168, 85, 247, 0.22);
+    box-shadow: 0 30px 95px rgba(0, 0, 0, 0.95), 0 0 60px rgba(0, 212, 255, 0.35), 0 0 95px rgba(168, 85, 247, 0.25);
 }}
 
 .video-wrapper {{
     position: relative;
     width: 100%;
-    height: 480px;
-    max-height: 65vh;
-    border-radius: 19px;
+    height: 100%;
+    border-radius: 23px;
     overflow: hidden;
-    background: #05050a;
+    background: #000000;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -213,8 +133,8 @@ body {{
     display: flex;
     flex-direction: column;
     justify-content: space-between;
-    padding: 18px 22px;
-    background: linear-gradient(180deg, rgba(0,0,0,0.60) 0%, transparent 25%, transparent 75%, rgba(0,0,0,0.80) 100%);
+    padding: 22px 28px;
+    background: linear-gradient(180deg, rgba(0,0,0,0.65) 0%, transparent 22%, transparent 78%, rgba(0,0,0,0.85) 100%);
     opacity: 0.95;
     transition: opacity 0.3s ease;
     pointer-events: none;
@@ -237,53 +157,69 @@ body {{
     display: inline-flex;
     align-items: center;
     gap: 8px;
-    padding: 6px 14px;
+    padding: 7px 18px;
     border-radius: 50px;
-    background: rgba(10, 15, 30, 0.88);
-    border: 1px solid rgba(0, 212, 255, 0.3);
-    backdrop-filter: blur(14px);
-    -webkit-backdrop-filter: blur(14px);
+    background: rgba(10, 15, 30, 0.90);
+    border: 1px solid rgba(0, 212, 255, 0.35);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
     color: #e2e8f0;
     font-family: 'JetBrains Mono', monospace;
-    font-size: 0.74rem;
+    font-size: 0.76rem;
     font-weight: 700;
     letter-spacing: 0.5px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+}}
+
+.badge-pulse {{
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #00d4ff;
+    box-shadow: 0 0 10px #00d4ff;
+    animation: pulse 1.6s infinite ease-in-out;
+}}
+
+@keyframes pulse {{
+    0%, 100% {{ transform: scale(1); opacity: 1; }}
+    50% {{ transform: scale(1.4); opacity: 0.4; }}
 }}
 
 .hud-actions {{
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: 10px;
 }}
 
 .hud-btn {{
-    background: rgba(10, 15, 30, 0.88);
-    border: 1px solid rgba(255, 255, 255, 0.18);
+    background: rgba(10, 15, 30, 0.90);
+    border: 1px solid rgba(255, 255, 255, 0.20);
     border-radius: 50px;
     color: #ffffff;
-    padding: 7px 14px;
-    font-size: 0.78rem;
+    padding: 8px 18px;
+    font-size: 0.82rem;
     font-weight: 600;
     display: inline-flex;
     align-items: center;
-    gap: 6px;
+    gap: 7px;
     cursor: pointer;
-    backdrop-filter: blur(14px);
-    -webkit-backdrop-filter: blur(14px);
-    transition: all 0.2s ease;
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    transition: all 0.22s ease;
     user-select: none;
     outline: none;
+    box-shadow: 0 4px 18px rgba(0,0,0,0.4);
 }}
 
 .hud-btn:hover {{
-    background: rgba(0, 212, 255, 0.28);
-    border-color: rgba(0, 212, 255, 0.6);
-    box-shadow: 0 0 16px rgba(0, 212, 255, 0.4);
+    background: rgba(0, 212, 255, 0.30);
+    border-color: rgba(0, 212, 255, 0.7);
+    box-shadow: 0 0 20px rgba(0, 212, 255, 0.45);
     transform: translateY(-2px);
 }}
 
 .hud-btn.active {{
-    background: rgba(0, 212, 255, 0.35);
+    background: rgba(0, 212, 255, 0.40);
     border-color: #00d4ff;
     color: #00d4ff;
 }}
@@ -291,15 +227,15 @@ body {{
 .hud-bottom {{
     display: flex;
     flex-direction: column;
-    gap: 10px;
+    gap: 12px;
     pointer-events: auto;
     width: 100%;
 }}
 
 .progress-track {{
     width: 100%;
-    height: 6px;
-    background: rgba(255, 255, 255, 0.16);
+    height: 7px;
+    background: rgba(255, 255, 255, 0.18);
     border-radius: 6px;
     cursor: pointer;
     position: relative;
@@ -308,7 +244,7 @@ body {{
 }}
 
 .progress-track:hover {{
-    height: 9px;
+    height: 11px;
 }}
 
 .progress-bar {{
@@ -319,7 +255,7 @@ body {{
     width: 0%;
     background: linear-gradient(90deg, #00d4ff, #a855f7, #f43f5e);
     border-radius: 6px;
-    box-shadow: 0 0 10px rgba(0, 212, 255, 0.8);
+    box-shadow: 0 0 12px rgba(0, 212, 255, 0.9);
     transition: width 0.1s linear;
 }}
 
@@ -328,7 +264,7 @@ body {{
     justify-content: space-between;
     align-items: center;
     color: #cbd5e1;
-    font-size: 0.78rem;
+    font-size: 0.82rem;
     font-family: 'JetBrains Mono', monospace;
 }}
 
@@ -342,6 +278,7 @@ body {{
 
 :fullscreen .cinematic-frame,
 :-webkit-full-screen .cinematic-frame {{
+    height: 100vh !important;
     padding: 0 !important;
     border-radius: 0 !important;
 }}
@@ -350,24 +287,7 @@ body {{
 <body>
 
 <div class="showcase-container">
-    <!-- Header -->
-    <div class="video-header">
-        <div class="video-badge">
-            <span class="badge-pulse"></span>
-            <span>FEATURED SHOWCASE</span>
-        </div>
-        <div class="video-title">
-            {title_first} <span class="video-title-accent">{title_rest}</span>
-        </div>
-        <div class="video-subtitle">
-            {subtitle}
-        </div>
-        <div class="video-handwritten">
-            Scroll-Synced &amp; Fullscreen ⚡
-        </div>
-    </div>
-
-    <!-- Frame -->
+    <!-- Huge Cinematic Frame -->
     <div class="cinematic-frame" id="frame-box">
         <div class="video-wrapper" id="vid-wrapper">
             <video
@@ -379,7 +299,7 @@ body {{
                 preload="auto"
             ></video>
 
-            <!-- HUD Overlay -->
+            <!-- Floating HUD Overlay -->
             <div class="hud-overlay">
                 <div class="hud-top">
                     <div class="hud-badge" id="status-badge">
@@ -408,8 +328,8 @@ body {{
                         <div class="progress-bar" id="prog-bar"></div>
                     </div>
                     <div class="hud-info">
-                        <span style="display:inline-flex; align-items:center; gap:6px;">
-                            <span style="color:#00d4ff;">●</span> 1080p Ultra-HD Video Reel
+                        <span style="display:inline-flex; align-items:center; gap:8px;">
+                            <span style="color:#00d4ff;">●</span> 1080p Ultra-HD Fullscreen Reel
                         </span>
                         <span id="time-lbl">0:00 / 0:00</span>
                     </div>
@@ -450,13 +370,13 @@ body {{
             playLbl.textContent = 'Pause';
             statusText.textContent = 'SCROLL-SYNC: PLAYING';
             statusDot.style.background = '#00d4ff';
-            statusDot.style.boxShadow = '0 0 8px #00d4ff';
+            statusDot.style.boxShadow = '0 0 10px #00d4ff';
         }} else {{
             playIc.textContent = '▶';
             playLbl.textContent = 'Play';
             statusText.textContent = 'SCROLL-SYNC: PAUSED';
             statusDot.style.background = '#f59e0b';
-            statusDot.style.boxShadow = '0 0 8px #f59e0b';
+            statusDot.style.boxShadow = '0 0 10px #f59e0b';
         }}
     }}
 
@@ -484,7 +404,7 @@ body {{
         }}
     }});
 
-    // Direct click on video to play/pause
+    // Direct click on video to toggle play/pause
     video.addEventListener('click', () => {{
         if (video.paused) video.play();
         else video.pause();
@@ -528,7 +448,6 @@ body {{
         try {{
             const frame = window.frameElement;
             if (!frame) {{
-                // Fallback: If not in iframe, check local window
                 const r = frameBox.getBoundingClientRect();
                 const vh = window.innerHeight;
                 const vis = (r.top < vh * 0.85) && (r.bottom > vh * 0.15);
@@ -541,7 +460,6 @@ body {{
             const r = frame.getBoundingClientRect();
             const vh = pWin.innerHeight || 800;
 
-            // When at least ~20% of video is visible
             const isVisible = (r.top < vh * 0.82) && (r.bottom > vh * 0.18);
 
             if (isVisible) {{
@@ -562,7 +480,6 @@ body {{
         }} catch(e) {{}}
     }}
 
-    // Attach listeners to parent window & scroll containers
     try {{
         if (window.parent) {{
             const pDoc = window.parent.document;
@@ -574,7 +491,6 @@ body {{
 
     window.addEventListener('scroll', checkViewport, {{ passive: true }});
 
-    // Check periodically on mount
     setTimeout(checkViewport, 300);
     setTimeout(checkViewport, 800);
     setTimeout(checkViewport, 1500);
@@ -584,4 +500,4 @@ body {{
 </body>
 </html>"""
 
-    components.html(html_content, height=650, scrolling=False)
+    components.html(html_content, height=720, scrolling=False)
