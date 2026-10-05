@@ -62,11 +62,8 @@ def render_preloader():
     profile = load_profile()
     enable_video = profile.get("enable_intro_video", True)
     
-    # Static video paths for fast native streaming on phones
-    static_video_url = "app/static/video/intro_video.mp4"
     video_b64 = _get_intro_video_b64() if enable_video else ""
-    has_video_js = "true" if enable_video else "false"
-    video_b64_js = f'"data:video/mp4;base64,{video_b64}"' if video_b64 else '""'
+    has_video_js = "true" if (enable_video and video_b64) else "false"
 
     components.html(f"""
     <script>
@@ -78,8 +75,7 @@ def render_preloader():
             }}
 
             var hasVideo = {has_video_js};
-            var videoStaticSrc = "{static_video_url}";
-            var videoB64Src = {video_b64_js};
+            var rawB64 = {repr(video_b64)};
 
             var overlay = pDoc.createElement('div');
             overlay.id = 'intro-preloader-overlay';
@@ -320,13 +316,13 @@ def render_preloader():
                     background: rgba(0, 212, 255, 0.2) !important;
                 }}
 
-                /* Bottom Progress Bar */
+                /* Bottom Progress Bar & Time Tracker */
                 .video-progress-wrap {{
                     position: absolute;
                     bottom: 0;
                     left: 0;
                     right: 0;
-                    height: 4px;
+                    height: 5px;
                     background: rgba(255, 255, 255, 0.15);
                     z-index: 10;
                 }}
@@ -335,6 +331,20 @@ def render_preloader():
                     height: 100%;
                     background: linear-gradient(90deg, #00d4ff, #a855f7);
                     transition: width 0.1s linear;
+                }}
+                .video-time-tag {{
+                    position: absolute;
+                    bottom: 12px;
+                    left: 18px;
+                    font-size: 0.78rem;
+                    font-family: 'JetBrains Mono', monospace;
+                    color: rgba(255, 255, 255, 0.75);
+                    background: rgba(0, 0, 0, 0.55);
+                    padding: 3px 10px;
+                    border-radius: 20px;
+                    backdrop-filter: blur(8px);
+                    pointer-events: none;
+                    z-index: 10;
                 }}
 
                 .preloader-bottom-enter-btn {{
@@ -452,6 +462,7 @@ def render_preloader():
                             x5-video-player-type="h5-page"
                             preload="auto">
                         </video>
+                        <div class="video-time-tag" id="preloader-time-tag">0:00 / 0:31</div>
                         <div class="video-progress-wrap">
                             <div class="video-progress-bar" id="preloader-pbar"></div>
                         </div>
@@ -474,9 +485,37 @@ def render_preloader():
             var muteIcon = pDoc.getElementById('video-mute-icon');
             var muteText = pDoc.getElementById('video-mute-text');
             var pBar = pDoc.getElementById('preloader-pbar');
+            var timeTag = pDoc.getElementById('preloader-time-tag');
             var splashWave = pDoc.getElementById('splash-ripple-wave');
 
             var isDismissed = false;
+
+            // Convert base64 to Blob URL for random-access native seeking without data-URI limits
+            var blobVideoUrl = null;
+            function getBlobVideoUrl() {{
+                if (blobVideoUrl) return blobVideoUrl;
+                if (!rawB64) return null;
+                try {{
+                    var binary = atob(rawB64);
+                    var array = new Uint8Array(binary.length);
+                    for (var i = 0; i < binary.length; i++) {{
+                        array[i] = binary.charCodeAt(i);
+                    }}
+                    var blob = new Blob([array], {{ type: 'video/mp4' }});
+                    blobVideoUrl = URL.createObjectURL(blob);
+                    return blobVideoUrl;
+                }} catch(e) {{
+                    console.warn('Blob URL conversion fallback error:', e);
+                    return 'data:video/mp4;base64,' + rawB64;
+                }}
+            }}
+
+            function fmtTime(sec) {{
+                if (!sec || isNaN(sec)) return '0:00';
+                var m = Math.floor(sec / 60);
+                var s = Math.floor(sec % 60);
+                return m + ':' + (s < 10 ? '0' : '') + s;
+            }}
 
             function startBackgroundMusic() {{
                 try {{
@@ -554,37 +593,39 @@ def render_preloader():
                 }}, 100);
             }}
 
-            /* ── Robust Video Playback (Static Native URL + Fallback) ── */
+            /* ── Robust Video Playback (Blob & Native Hardware Streaming) ── */
             function startVideoSafely() {{
                 if (!videoElem) {{
                     executeDissolveAndSplash();
                     return;
                 }}
 
-                // Try static streaming url first for hardware acceleration, fallback to b64
-                videoElem.src = videoStaticSrc || videoB64Src;
-                videoElem.muted = true; // ALWAYS start muted to guarantee no mobile browser pause!
+                // Use high-performance Blob URL (no 9MB data URI choke, supports full 31.4s stream)
+                var activeSrc = getBlobVideoUrl();
+                videoElem.src = activeSrc;
+                videoElem.muted = true; // Always start muted to guarantee immediate uninterrupted mobile play
                 videoElem.volume = 0.85;
 
+                // Only finish when FULL video has finished completely
                 videoElem.onended = function() {{
-                    executeDissolveAndSplash();
-                }};
-                videoElem.onerror = function(err) {{
-                    if (videoElem.src !== videoB64Src && videoB64Src) {{
-                        // Fallback to base64 if static URL failed
-                        videoElem.src = videoB64Src;
-                        videoElem.play().catch(function() {{
-                            executeDissolveAndSplash();
-                        }});
-                    }} else {{
+                    if (!videoElem.duration || isNaN(videoElem.duration) || videoElem.currentTime >= videoElem.duration - 0.75) {{
                         executeDissolveAndSplash();
+                    }} else {{
+                        // Premature pause or buffer resume
+                        videoElem.play().catch(function() {{}});
                     }}
                 }};
 
+                videoElem.onerror = function(err) {{
+                    console.warn('Video playback error, dissolving gracefully:', err);
+                    executeDissolveAndSplash();
+                }};
+
                 videoElem.ontimeupdate = function() {{
-                    if (videoElem.duration && pBar) {{
+                    if (videoElem.duration && !isNaN(videoElem.duration)) {{
                         var pct = (videoElem.currentTime / videoElem.duration) * 100;
-                        pBar.style.width = pct + '%';
+                        if (pBar) pBar.style.width = pct + '%';
+                        if (timeTag) timeTag.textContent = fmtTime(videoElem.currentTime) + ' / ' + fmtTime(videoElem.duration);
                     }}
                 }};
 
@@ -622,7 +663,7 @@ def render_preloader():
                     ropeTrigger.classList.add('pulled');
                 }}
 
-                if (hasVideo && (videoStaticSrc || videoB64Src) && videoStage && videoElem) {{
+                if (hasVideo && rawB64 && videoStage && videoElem) {{
                     // Hide stage 1 immediately
                     if (photoFrame) photoFrame.style.display = 'none';
                     if (ropeTrigger) ropeTrigger.style.display = 'none';
@@ -694,4 +735,5 @@ def render_preloader():
     }})();
     </script>
     """, height=0, width=0)
+
 
