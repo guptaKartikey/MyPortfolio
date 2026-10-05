@@ -31,6 +31,10 @@ PROJECT_IMG_DIR  = ASSETS_DIR / "projects"
 CERT_IMG_DIR     = ASSETS_DIR / "certificates"
 RESUME_DIR       = ASSETS_DIR / "resume"
 VIDEO_DIR        = ASSETS_DIR / "video"
+STATIC_DIR       = BASE_DIR / "static"
+STATIC_VIDEO_DIR = STATIC_DIR / "video"
+STATIC_ASSETS_DIR= STATIC_DIR / "assets"
+
 
 # JSON file paths
 PROFILE_FILE      = DATA_DIR / "profile.json"
@@ -43,7 +47,8 @@ MESSAGES_FILE     = DATA_DIR / "messages.json"
 
 
 def ensure_dirs() -> None:
-    """Create all required folders if they don't already exist."""
+    """Create all required folders if they don't already exist and sync static files."""
+    import shutil
     dirs = [
         DATA_DIR,
         PROFILE_IMG_DIR,
@@ -51,9 +56,22 @@ def ensure_dirs() -> None:
         CERT_IMG_DIR,
         RESUME_DIR,
         VIDEO_DIR,
+        STATIC_DIR,
+        STATIC_VIDEO_DIR,
+        STATIC_ASSETS_DIR,
     ]
     for d in dirs:
         d.mkdir(parents=True, exist_ok=True)
+
+    # Sync assets into static for fast native streaming
+    try:
+        for vid in VIDEO_DIR.glob("*.mp4"):
+            dest = STATIC_VIDEO_DIR / vid.name
+            if not dest.exists() or dest.stat().st_size != vid.stat().st_size:
+                shutil.copy2(vid, dest)
+    except Exception:
+        pass
+
 
 
 # ──────────────────────────────────────────────

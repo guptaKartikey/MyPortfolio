@@ -59,9 +59,14 @@ def render_preloader():
     if not img_b64:
         return
 
-    video_b64 = _get_intro_video_b64()
-    has_video_js = "true" if video_b64 else "false"
-    video_src_js = f'"data:video/mp4;base64,{video_b64}"' if video_b64 else '""'
+    profile = load_profile()
+    enable_video = profile.get("enable_intro_video", True)
+    
+    # Static video paths for fast native streaming on phones
+    static_video_url = "app/static/video/intro_video.mp4"
+    video_b64 = _get_intro_video_b64() if enable_video else ""
+    has_video_js = "true" if enable_video else "false"
+    video_b64_js = f'"data:video/mp4;base64,{video_b64}"' if video_b64 else '""'
 
     components.html(f"""
     <script>
@@ -73,7 +78,8 @@ def render_preloader():
             }}
 
             var hasVideo = {has_video_js};
-            var videoSrc = {video_src_js};
+            var videoStaticSrc = "{static_video_url}";
+            var videoB64Src = {video_b64_js};
 
             var overlay = pDoc.createElement('div');
             overlay.id = 'intro-preloader-overlay';
@@ -226,7 +232,6 @@ def render_preloader():
                     background: #000000;
                     opacity: 0;
                     transition: opacity 0.5s cubic-bezier(0.16, 1, 0.3, 1);
-                    cursor: pointer;
                 }}
                 .preloader-video-stage.video-active {{
                     display: flex !important;
@@ -254,12 +259,18 @@ def render_preloader():
                     background: #000;
                 }}
 
-                /* ── Top-Right Glowing Skip Button ── */
-                .video-skip-btn {{
+                /* ── Action Buttons Overlay ── */
+                .video-ctrls-top {{
                     position: fixed !important;
                     top: max(20px, env(safe-area-inset-top, 20px)) !important;
                     right: max(20px, env(safe-area-inset-right, 20px)) !important;
                     z-index: 99999999999 !important;
+                    display: inline-flex !important;
+                    align-items: center !important;
+                    gap: 12px !important;
+                }}
+
+                .video-skip-btn {{
                     display: inline-flex !important;
                     align-items: center !important;
                     gap: 8px !important;
@@ -286,20 +297,44 @@ def render_preloader():
                     box-shadow: 0 10px 35px rgba(0, 212, 255, 0.8), 0 0 30px rgba(168, 85, 247, 0.6) !important;
                 }}
 
-                .preloader-bottom-hint {{
+                .video-mute-btn {{
+                    display: inline-flex !important;
+                    align-items: center !important;
+                    gap: 6px !important;
+                    padding: 12px 20px !important;
+                    border-radius: 50px !important;
+                    background: rgba(10, 12, 28, 0.92) !important;
+                    border: 1.5px solid rgba(255, 255, 255, 0.25) !important;
+                    color: #e2e8f0 !important;
+                    font-size: 0.88rem !important;
+                    font-weight: 700 !important;
+                    cursor: pointer !important;
+                    backdrop-filter: blur(20px) !important;
+                    transition: all 0.25s ease !important;
+                    touch-action: manipulation !important;
+                }}
+                .video-mute-btn:hover,
+                .video-mute-btn:active {{
+                    border-color: #00d4ff !important;
+                    color: #ffffff !important;
+                    background: rgba(0, 212, 255, 0.2) !important;
+                }}
+
+                /* Bottom Progress Bar */
+                .video-progress-wrap {{
                     position: absolute;
-                    bottom: max(18px, env(safe-area-inset-bottom, 18px));
-                    left: 50%;
-                    transform: translateX(-50%);
-                    color: rgba(255, 255, 255, 0.65);
-                    font-size: 0.78rem;
-                    letter-spacing: 0.5px;
-                    pointer-events: none;
-                    background: rgba(0, 0, 0, 0.6);
-                    padding: 5px 14px;
-                    border-radius: 20px;
-                    border: 1px solid rgba(255, 255, 255, 0.1);
-                    backdrop-filter: blur(8px);
+                    bottom: 0;
+                    left: 0;
+                    right: 0;
+                    height: 4px;
+                    background: rgba(255, 255, 255, 0.15);
+                    z-index: 10;
+                }}
+                .video-progress-bar {{
+                    width: 0%;
+                    height: 100%;
+                    background: linear-gradient(90deg, #00d4ff, #a855f7);
+                    transition: width 0.1s linear;
                 }}
 
                 .preloader-bottom-enter-btn {{
@@ -359,11 +394,18 @@ def render_preloader():
                     .lamp-cord {{ height: 85px; width: 3px; }}
                     .lamp-handle {{ width: 32px; height: 46px; font-size: 1.15rem; }}
                     .lamp-rope-tag {{ font-size: 0.72rem; padding: 5px 10px; margin-top: 6px; }}
-                    .video-skip-btn {{
+                    .video-ctrls-top {{
                         top: max(14px, env(safe-area-inset-top, 14px)) !important;
                         right: max(14px, env(safe-area-inset-right, 14px)) !important;
-                        padding: 10px 20px !important;
+                        gap: 8px !important;
+                    }}
+                    .video-skip-btn {{
+                        padding: 10px 18px !important;
                         font-size: 0.82rem !important;
+                    }}
+                    .video-mute-btn {{
+                        padding: 10px 14px !important;
+                        font-size: 0.80rem !important;
                     }}
                     .preloader-bottom-enter-btn {{ bottom: 14px; right: 14px; padding: 8px 18px; font-size: 0.78rem; }}
                     .preloader-video-container {{
@@ -390,11 +432,16 @@ def render_preloader():
                     <span>Enter Portfolio</span> &rarr;
                 </button>
 
-                <!-- Stage 2: Fullscreen Cinematic Video Player with Skip Button in Right Corner -->
-                <div class="preloader-video-stage" id="preloader-video-stage" title="Tap to skip intro">
-                    <button class="video-skip-btn" id="video-skip-btn" title="Skip Intro & Enter">
-                        <span>Skip Intro</span> &nbsp;⏩
-                    </button>
+                <!-- Stage 2: Fullscreen Cinematic Video Player with Controls in Right Corner -->
+                <div class="preloader-video-stage" id="preloader-video-stage">
+                    <div class="video-ctrls-top">
+                        <button class="video-mute-btn" id="video-mute-btn" title="Toggle Audio">
+                            <span id="video-mute-icon">🔊</span> <span id="video-mute-text">Sound</span>
+                        </button>
+                        <button class="video-skip-btn" id="video-skip-btn" title="Skip Intro & Enter">
+                            <span>Skip Intro</span> &nbsp;⏩
+                        </button>
+                    </div>
                     <div class="preloader-video-container">
                         <video
                             class="preloader-video-elem"
@@ -405,8 +452,10 @@ def render_preloader():
                             x5-video-player-type="h5-page"
                             preload="auto">
                         </video>
+                        <div class="video-progress-wrap">
+                            <div class="video-progress-bar" id="preloader-pbar"></div>
+                        </div>
                     </div>
-                    <div class="preloader-bottom-hint">Tap anywhere to skip intro</div>
                 </div>
 
                 <!-- Stage 3: Splash Ripple Wave -->
@@ -421,10 +470,13 @@ def render_preloader():
             var videoStage = pDoc.getElementById('preloader-video-stage');
             var videoElem = pDoc.getElementById('preloader-video-elem');
             var skipBtn = pDoc.getElementById('video-skip-btn');
+            var muteBtn = pDoc.getElementById('video-mute-btn');
+            var muteIcon = pDoc.getElementById('video-mute-icon');
+            var muteText = pDoc.getElementById('video-mute-text');
+            var pBar = pDoc.getElementById('preloader-pbar');
             var splashWave = pDoc.getElementById('splash-ripple-wave');
 
             var isDismissed = false;
-            var safetyTimer = null;
 
             function startBackgroundMusic() {{
                 try {{
@@ -472,11 +524,6 @@ def render_preloader():
                 if (isDismissed) return;
                 isDismissed = true;
 
-                if (safetyTimer) {{
-                    clearTimeout(safetyTimer);
-                    safetyTimer = null;
-                }}
-
                 // Stop video cleanly
                 if (videoElem) {{
                     try {{
@@ -507,58 +554,66 @@ def render_preloader():
                 }}, 100);
             }}
 
-            /* ── Robust Video Playback with Muted Fallback for Phones ── */
+            /* ── Robust Video Playback (Static Native URL + Fallback) ── */
             function startVideoSafely() {{
-                if (!videoElem || !videoSrc) {{
+                if (!videoElem) {{
                     executeDissolveAndSplash();
                     return;
                 }}
 
-                videoElem.src = videoSrc;
+                // Try static streaming url first for hardware acceleration, fallback to b64
+                videoElem.src = videoStaticSrc || videoB64Src;
+                videoElem.muted = true; // ALWAYS start muted to guarantee no mobile browser pause!
                 videoElem.volume = 0.85;
 
-                // Event handlers to ensure it never gets stuck
                 videoElem.onended = function() {{
                     executeDissolveAndSplash();
                 }};
                 videoElem.onerror = function(err) {{
-                    console.warn('Video failed to load or decode, dissolving smoothly:', err);
-                    executeDissolveAndSplash();
+                    if (videoElem.src !== videoB64Src && videoB64Src) {{
+                        // Fallback to base64 if static URL failed
+                        videoElem.src = videoB64Src;
+                        videoElem.play().catch(function() {{
+                            executeDissolveAndSplash();
+                        }});
+                    }} else {{
+                        executeDissolveAndSplash();
+                    }}
                 }};
 
-                // Try playing with audio synchronously
-                var p = videoElem.play();
-                if (p !== undefined) {{
-                    p.then(function() {{
-                        // Successfully playing
-                        armSafetyTimer();
+                videoElem.ontimeupdate = function() {{
+                    if (videoElem.duration && pBar) {{
+                        var pct = (videoElem.currentTime / videoElem.duration) * 100;
+                        pBar.style.width = pct + '%';
+                    }}
+                }};
+
+                // Play video immediately
+                var playPromise = videoElem.play();
+                if (playPromise !== undefined) {{
+                    playPromise.then(function() {{
+                        // Try unmuting automatically
+                        setTimeout(function() {{
+                            try {{
+                                videoElem.muted = false;
+                                if (muteIcon) muteIcon.textContent = '🔊';
+                                if (muteText) muteText.textContent = 'Sound On';
+                            }} catch(e) {{
+                                videoElem.muted = true;
+                                if (muteIcon) muteIcon.textContent = '🔇';
+                                if (muteText) muteText.textContent = 'Tap for Sound';
+                            }}
+                        }}, 150);
                     }}).catch(function(err) {{
-                        console.warn('Direct unmuted play blocked on mobile, retrying muted:', err);
-                        // Mobile browser blocked unmuted autoplay -> immediately switch to muted and play
+                        // Fallback: force muted play
                         videoElem.muted = true;
-                        videoElem.play().then(function() {{
-                            armSafetyTimer();
-                        }}).catch(function(finalErr) {{
-                            console.error('Video playback completely unsupported/failed, dissolving:', finalErr);
+                        if (muteIcon) muteIcon.textContent = '🔇';
+                        if (muteText) muteText.textContent = 'Tap for Sound';
+                        videoElem.play().catch(function() {{
                             executeDissolveAndSplash();
                         }});
                     }});
-                }} else {{
-                    armSafetyTimer();
                 }}
-            }}
-
-            function armSafetyTimer() {{
-                if (safetyTimer) clearTimeout(safetyTimer);
-                // Set fallback timer based on video duration or safe default of 10s
-                var durationSec = (videoElem && videoElem.duration && !isNaN(videoElem.duration) && videoElem.duration > 0) ? videoElem.duration : 10;
-                var timeoutMs = Math.min(Math.max((durationSec + 2) * 1000, 5000), 20000);
-                safetyTimer = setTimeout(function() {{
-                    if (!isDismissed) {{
-                        console.log('Video safety timeout reached, completing intro.');
-                        executeDissolveAndSplash();
-                    }}
-                }}, timeoutMs);
             }}
 
             /* ── Handle Pull Rope / Enter Click ── */
@@ -567,7 +622,7 @@ def render_preloader():
                     ropeTrigger.classList.add('pulled');
                 }}
 
-                if (hasVideo && videoSrc && videoStage && videoElem) {{
+                if (hasVideo && (videoStaticSrc || videoB64Src) && videoStage && videoElem) {{
                     // Hide stage 1 immediately
                     if (photoFrame) photoFrame.style.display = 'none';
                     if (ropeTrigger) ropeTrigger.style.display = 'none';
@@ -576,7 +631,7 @@ def render_preloader():
                     // Activate video stage
                     videoStage.classList.add('video-active');
 
-                    // Start video synchronously inside the user event handler
+                    // Start video
                     startVideoSafely();
                 }} else {{
                     // No video: directly dissolve & splash
@@ -586,7 +641,7 @@ def render_preloader():
                 }}
             }}
 
-            // Event bindings with multi-touch / click support
+            // Helper to bind touches without double-fire
             function addMultiEvent(el, handler) {{
                 if (!el) return;
                 var triggered = false;
@@ -598,7 +653,7 @@ def render_preloader():
                     if (!triggered) {{
                         triggered = true;
                         handler();
-                        setTimeout(function() {{ triggered = false; }}, 500);
+                        setTimeout(function() {{ triggered = false; }}, 400);
                     }}
                 }}
                 el.addEventListener('click', triggerOnce);
@@ -609,13 +664,29 @@ def render_preloader():
             addMultiEvent(enterTrigger, onRopePulled);
             addMultiEvent(photoFrame, onRopePulled);
 
-            // Skip button & tap anywhere on video stage to skip
+            // Dedicated Skip button
             addMultiEvent(skipBtn, function() {{
                 executeDissolveAndSplash();
             }});
-            addMultiEvent(videoStage, function() {{
-                executeDissolveAndSplash();
-            }});
+
+            // Mute / Unmute toggle button
+            if (muteBtn) {{
+                muteBtn.addEventListener('click', function(e) {{
+                    e.preventDefault();
+                    e.stopPropagation();
+                    if (videoElem) {{
+                        videoElem.muted = !videoElem.muted;
+                        if (videoElem.muted) {{
+                            if (muteIcon) muteIcon.textContent = '🔇';
+                            if (muteText) muteText.textContent = 'Muted';
+                        }} else {{
+                            videoElem.volume = 0.85;
+                            if (muteIcon) muteIcon.textContent = '🔊';
+                            if (muteText) muteText.textContent = 'Sound On';
+                        }}
+                    }}
+                }});
+            }}
 
         }} catch(err) {{
             console.error(err);
