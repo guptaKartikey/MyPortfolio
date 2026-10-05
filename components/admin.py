@@ -50,9 +50,10 @@ def _check_password() -> bool:
     password_input = st.text_input("Password", type="password", key="admin_pw_input")
     if st.button("Login", use_container_width=True):
         try:
-            correct_pw = st.secrets.get("ADMIN_PASSWORD", "admin123")
+            correct_pw = st.secrets.get("ADMIN_PASSWORD", "2004@gupta")
         except Exception:
-            correct_pw = "admin123"
+            correct_pw = "2004@gupta"
+
 
         if password_input == correct_pw:
             st.session_state.admin_authenticated = True
