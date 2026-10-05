@@ -14,11 +14,13 @@ Features:
 import os
 import base64
 from pathlib import Path
+import streamlit as st
 import streamlit.components.v1 as components
 
 from utils.data_manager import load_profile
 
 
+@st.cache_data(show_spinner=False)
 def _get_showcase_video_b64() -> str:
     """Load the showcase video in base64 format."""
     profile = load_profile()

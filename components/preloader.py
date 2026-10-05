@@ -10,10 +10,12 @@ Cinematic intro splash preloader featuring:
 import os
 import base64
 from pathlib import Path
+import streamlit as st
 import streamlit.components.v1 as components
 from utils.data_manager import load_profile
 
 
+@st.cache_data(show_spinner=False)
 def _get_intro_img_b64() -> str:
     """Load optimized intro image in base64."""
     for p in ["assets/intro.jpg", "img.png", "assets/intro_banner.png"]:
@@ -27,6 +29,7 @@ def _get_intro_img_b64() -> str:
     return ""
 
 
+@st.cache_data(show_spinner=False)
 def _get_intro_video_b64() -> str:
     """Load intro video in base64 if enabled and available."""
     profile = load_profile()

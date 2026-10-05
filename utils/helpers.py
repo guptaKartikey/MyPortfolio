@@ -37,6 +37,7 @@ def inject_html(html: str) -> None:
 # Image helpers
 # ──────────────────────────────────────────────
 
+@st.cache_data(show_spinner=False)
 def img_to_base64(path: str) -> str:
     """
     Read an image file and return its base64 encoded string.
@@ -74,6 +75,7 @@ def get_img_tag(path: str, alt: str = "image", css_class: str = "") -> str:
 # File download helper
 # ──────────────────────────────────────────────
 
+@st.cache_data(show_spinner=False)
 def get_file_as_b64(path: str) -> str:
     """Return base64 encoded content of any file (e.g. PDF resume)."""
     p = Path(path)

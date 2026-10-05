@@ -8,9 +8,11 @@ or high-quality royalty-free CDN audio.
 
 import os
 import base64
+import streamlit as st
 import streamlit.components.v1 as components
 
 
+@st.cache_data(show_spinner=False)
 def _get_audio_source(asset_dir: str = "assets") -> str:
     """Return base64 data URI if custom uploaded song or assets/music.mp3 exists, else fallback CDN link."""
     candidates = [

@@ -14,6 +14,7 @@ import json
 import os
 from datetime import datetime
 from pathlib import Path
+import streamlit as st
 
 
 # ──────────────────────────────────────────────
@@ -81,12 +82,17 @@ def save_json(path: Path, data) -> None:
     ensure_dirs()
     with open(path, "w", encoding="utf-8") as f:
         json.dump(data, f, indent=2, ensure_ascii=False)
+    try:
+        st.cache_data.clear()
+    except Exception:
+        pass
 
 
 # ──────────────────────────────────────────────
-# Typed loaders — each returns a safe default
+# Typed loaders — each returns a safe default (cached)
 # ──────────────────────────────────────────────
 
+@st.cache_data(show_spinner=False)
 def load_profile() -> dict:
     defaults = {
         "name": "Kartikey Gupta",
@@ -120,18 +126,22 @@ def load_profile() -> dict:
     return data
 
 
+@st.cache_data(show_spinner=False)
 def load_skills() -> dict:
     return load_json(SKILLS_FILE, {"categories": []})
 
 
+@st.cache_data(show_spinner=False)
 def load_projects() -> dict:
     return load_json(PROJECTS_FILE, {"projects": []})
 
 
+@st.cache_data(show_spinner=False)
 def load_certificates() -> dict:
     return load_json(CERTIFICATES_FILE, {"certificates": []})
 
 
+@st.cache_data(show_spinner=False)
 def load_experience() -> dict:
     return load_json(EXPERIENCE_FILE, {"experiences": []})
 
