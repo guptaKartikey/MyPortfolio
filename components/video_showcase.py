@@ -4,11 +4,11 @@ components/video_showcase.py
 ============================
 Cinematic Full-Screen Video Showcase Section placed between Certificates and Contact.
 Features:
-- Pure clean full-screen widescreen video player (without header text clutter).
-- Scroll-synced auto-playback: Automatically plays when entering viewport,
-  pauses when scrolling down to Contact or scrolling up above.
-- Floating glassmorphic HUD: Play/Pause, Mute/Unmute, Fullscreen, progress seek bar.
-- Admin customizable via profile data.
+- Pure clean full-screen widescreen video player.
+- Fully automatic: Plays with audio automatically when viewed / scrolled into view.
+- Automatically pauses when scrolled away (to Contact or above).
+- Resumes automatically when scrolled back into view.
+- Manual mute/pause buttons removed as requested. Fullscreen control retained.
 """
 
 import os
@@ -124,11 +124,11 @@ html, body {{
     height: 100%;
     object-fit: cover;
     display: block;
-    cursor: pointer;
+    cursor: default;
     background: #000;
 }}
 
-/* ── HUD Controls Overlay ── */
+/* ── Minimal Non-Intrusive HUD Overlay ── */
 .hud-overlay {{
     position: absolute;
     inset: 0;
@@ -136,8 +136,8 @@ html, body {{
     flex-direction: column;
     justify-content: space-between;
     padding: 22px 28px;
-    background: linear-gradient(180deg, rgba(0,0,0,0.65) 0%, transparent 22%, transparent 78%, rgba(0,0,0,0.85) 100%);
-    opacity: 0.95;
+    background: linear-gradient(180deg, rgba(0,0,0,0.55) 0%, transparent 22%, transparent 78%, rgba(0,0,0,0.75) 100%);
+    opacity: 0.85;
     transition: opacity 0.3s ease;
     pointer-events: none;
     z-index: 10;
@@ -220,12 +220,6 @@ html, body {{
     transform: translateY(-2px);
 }}
 
-.hud-btn.active {{
-    background: rgba(0, 212, 255, 0.40);
-    border-color: #00d4ff;
-    color: #00d4ff;
-}}
-
 .hud-bottom {{
     display: flex;
     flex-direction: column;
@@ -289,35 +283,25 @@ html, body {{
 <body>
 
 <div class="showcase-container">
-    <!-- Huge Cinematic Frame -->
     <div class="cinematic-frame" id="frame-box">
         <div class="video-wrapper" id="vid-wrapper">
             <video
                 id="showcase-vid"
                 src="data:video/mp4;base64,{video_b64}"
                 playsinline
-                muted
                 loop
                 preload="auto"
             ></video>
 
-            <!-- Floating HUD Overlay -->
+            <!-- Minimal HUD Overlay -->
             <div class="hud-overlay">
                 <div class="hud-top">
                     <div class="hud-badge" id="status-badge">
                         <span class="badge-pulse" id="status-dot" style="background:#10b981; box-shadow:0 0 8px #10b981;"></span>
-                        <span id="status-text">SCROLL-SYNC: READY</span>
+                        <span id="status-text">AUTO-PLAYING</span>
                     </div>
 
                     <div class="hud-actions">
-                        <button type="button" class="hud-btn" id="btn-sound" title="Toggle Sound">
-                            <span id="sound-ic">🔇</span>
-                            <span id="sound-lbl">Unmute</span>
-                        </button>
-                        <button type="button" class="hud-btn" id="btn-play" title="Play / Pause">
-                            <span id="play-ic">▶</span>
-                            <span id="play-lbl">Play</span>
-                        </button>
                         <button type="button" class="hud-btn" id="btn-fs" title="Fullscreen">
                             <span>⛶</span>
                             <span>Fullscreen</span>
@@ -331,7 +315,7 @@ html, body {{
                     </div>
                     <div class="hud-info">
                         <span style="display:inline-flex; align-items:center; gap:8px;">
-                            <span style="color:#00d4ff;">●</span> 1080p Ultra-HD Fullscreen Reel
+                            <span style="color:#00d4ff;">●</span> 1080p Ultra-HD Reel
                         </span>
                         <span id="time-lbl">0:00 / 0:00</span>
                     </div>
@@ -342,18 +326,12 @@ html, body {{
 </div>
 
 <script>
-(function initPlayer() {{
+(function initAutoVideoPlayer() {{
     const video = document.getElementById('showcase-vid');
     const wrapper = document.getElementById('vid-wrapper');
     const frameBox = document.getElementById('frame-box');
     const statusText = document.getElementById('status-text');
     const statusDot = document.getElementById('status-dot');
-    const btnPlay = document.getElementById('btn-play');
-    const playIc = document.getElementById('play-ic');
-    const playLbl = document.getElementById('play-lbl');
-    const btnSound = document.getElementById('btn-sound');
-    const soundIc = document.getElementById('sound-ic');
-    const soundLbl = document.getElementById('sound-lbl');
     const btnFs = document.getElementById('btn-fs');
     const progTrack = document.getElementById('prog-track');
     const progBar = document.getElementById('prog-bar');
@@ -366,37 +344,20 @@ html, body {{
         return m + ':' + (sec < 10 ? '0' : '') + sec;
     }}
 
-    function setPlayState(playing) {{
+    function setPlayStatus(playing) {{
         if (playing) {{
-            playIc.textContent = '⏸';
-            playLbl.textContent = 'Pause';
-            statusText.textContent = 'SCROLL-SYNC: PLAYING';
+            statusText.textContent = 'LIVE PLAYING';
             statusDot.style.background = '#00d4ff';
             statusDot.style.boxShadow = '0 0 10px #00d4ff';
         }} else {{
-            playIc.textContent = '▶';
-            playLbl.textContent = 'Play';
-            statusText.textContent = 'SCROLL-SYNC: PAUSED';
+            statusText.textContent = 'PAUSED';
             statusDot.style.background = '#f59e0b';
             statusDot.style.boxShadow = '0 0 10px #f59e0b';
         }}
     }}
 
-    function setSoundState(muted) {{
-        if (muted) {{
-            soundIc.textContent = '🔇';
-            soundLbl.textContent = 'Unmute';
-            btnSound.classList.remove('active');
-        }} else {{
-            soundIc.textContent = '🔊';
-            soundLbl.textContent = 'Mute';
-            btnSound.classList.add('active');
-        }}
-    }}
-
-    video.addEventListener('play', () => setPlayState(true));
-    video.addEventListener('pause', () => setPlayState(false));
-    video.addEventListener('volumechange', () => setSoundState(video.muted));
+    video.addEventListener('play', () => setPlayStatus(true));
+    video.addEventListener('pause', () => setPlayStatus(false));
 
     video.addEventListener('timeupdate', () => {{
         if (video.duration) {{
@@ -406,46 +367,63 @@ html, body {{
         }}
     }});
 
-    // Direct click on video to toggle play/pause
-    video.addEventListener('click', () => {{
-        if (video.paused) video.play();
-        else video.pause();
-    }});
+    // Fullscreen toggle
+    if (btnFs) {{
+        btnFs.addEventListener('click', (e) => {{
+            e.stopPropagation();
+            if (!document.fullscreenElement) {{
+                if (wrapper.requestFullscreen) wrapper.requestFullscreen();
+                else if (wrapper.webkitRequestFullscreen) wrapper.webkitRequestFullscreen();
+                else if (video.requestFullscreen) video.requestFullscreen();
+            }} else {{
+                if (document.exitFullscreen) document.exitFullscreen();
+            }}
+        }});
+    }}
 
-    btnPlay.addEventListener('click', (e) => {{
-        e.stopPropagation();
-        if (video.paused) video.play();
-        else video.pause();
-    }});
+    // Seek track
+    if (progTrack) {{
+        progTrack.addEventListener('click', (e) => {{
+            e.stopPropagation();
+            const r = progTrack.getBoundingClientRect();
+            const clickX = e.clientX - r.left;
+            if (r.width > 0 && video.duration) {{
+                video.currentTime = (clickX / r.width) * video.duration;
+            }}
+        }});
+    }}
 
-    btnSound.addEventListener('click', (e) => {{
-        e.stopPropagation();
-        video.muted = !video.muted;
-        setSoundState(video.muted);
-        if (!video.muted && video.paused) video.play();
-    }});
+    /* ── Fully Automatic Play / Audio / Pause on Scroll ── */
+    function autoPlayWithAudio() {{
+        video.muted = false;
+        video.volume = 1.0;
+        const p = video.play();
+        if (p !== undefined) {{
+            p.catch(function() {{
+                // If browser blocks unmuted auto-play without prior gesture, start muted then unmute on next user action
+                video.muted = true;
+                video.play().catch(function() {{}});
 
-    btnFs.addEventListener('click', (e) => {{
-        e.stopPropagation();
-        if (!document.fullscreenElement) {{
-            if (wrapper.requestFullscreen) wrapper.requestFullscreen();
-            else if (wrapper.webkitRequestFullscreen) wrapper.webkitRequestFullscreen();
-            else if (video.requestFullscreen) video.requestFullscreen();
-        }} else {{
-            if (document.exitFullscreen) document.exitFullscreen();
+                function unmuteOnGesture() {{
+                    video.muted = false;
+                    video.volume = 1.0;
+                    window.removeEventListener('click', unmuteOnGesture);
+                    window.removeEventListener('scroll', unmuteOnGesture);
+                    if (window.parent) {{
+                        window.parent.removeEventListener('click', unmuteOnGesture);
+                        window.parent.removeEventListener('scroll', unmuteOnGesture);
+                    }}
+                }}
+                window.addEventListener('click', unmuteOnGesture, {{ once: true }});
+                window.addEventListener('scroll', unmuteOnGesture, {{ once: true }});
+                if (window.parent) {{
+                    window.parent.addEventListener('click', unmuteOnGesture, {{ once: true }});
+                    window.parent.addEventListener('scroll', unmuteOnGesture, {{ once: true }});
+                }}
+            }});
         }}
-    }});
+    }}
 
-    progTrack.addEventListener('click', (e) => {{
-        e.stopPropagation();
-        const r = progTrack.getBoundingClientRect();
-        const clickX = e.clientX - r.left;
-        if (r.width > 0 && video.duration) {{
-            video.currentTime = (clickX / r.width) * video.duration;
-        }}
-    }});
-
-    /* ── Viewport Scroll Sync via Parent Window ── */
     function checkViewport() {{
         try {{
             const frame = window.frameElement;
@@ -453,7 +431,7 @@ html, body {{
                 const r = frameBox.getBoundingClientRect();
                 const vh = window.innerHeight;
                 const vis = (r.top < vh * 0.85) && (r.bottom > vh * 0.15);
-                if (vis && video.paused) video.play().catch(() => {{ video.muted = true; video.play(); }});
+                if (vis && video.paused) autoPlayWithAudio();
                 else if (!vis && !video.paused) video.pause();
                 return;
             }}
@@ -466,13 +444,7 @@ html, body {{
 
             if (isVisible) {{
                 if (video.paused) {{
-                    const p = video.play();
-                    if (p !== undefined) {{
-                        p.catch(() => {{
-                            video.muted = true;
-                            video.play().catch(() => {{}});
-                        }});
-                    }}
+                    autoPlayWithAudio();
                 }}
             }} else {{
                 if (!video.paused) {{
@@ -493,10 +465,9 @@ html, body {{
 
     window.addEventListener('scroll', checkViewport, {{ passive: true }});
 
-    setTimeout(checkViewport, 300);
-    setTimeout(checkViewport, 800);
-    setTimeout(checkViewport, 1500);
-    setInterval(checkViewport, 400);
+    setTimeout(checkViewport, 200);
+    setTimeout(checkViewport, 600);
+    setInterval(checkViewport, 300);
 }})();
 </script>
 </body>
