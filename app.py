@@ -17,13 +17,19 @@ Architecture:
   - assets/          → images, resume PDF
 """
 
+from pathlib import Path
+from PIL import Image
 import streamlit as st
 import streamlit.components.v1 as components
+
+# ── Load custom KG Logo / Favicon ───────────────────────────────────────────
+_logo_file = Path(__file__).parent / "assets" / "logo.png"
+_fav_icon = Image.open(_logo_file) if _logo_file.exists() else "assets/logo.png"
 
 # ── Must be the FIRST Streamlit call ─────────────────────────────────────────
 st.set_page_config(
     page_title="Kartikey Gupta | Portfolio",
-    page_icon="🚀",
+    page_icon=_fav_icon,
     layout="wide",
     initial_sidebar_state="collapsed",
     menu_items={
@@ -961,6 +967,21 @@ def main():
             } catch(e) {}
           }
 
+          function setupFavicon(pDoc) {
+            try {
+              if (pDoc._favSet) return;
+              pDoc._favSet = true;
+              let link = pDoc.querySelector("link[rel*='icon']");
+              if (!link) {
+                link = pDoc.createElement('link');
+                link.rel = 'shortcut icon';
+                pDoc.getElementsByTagName('head')[0].appendChild(link);
+              }
+              link.type = 'image/png';
+              link.href = 'assets/logo.png';
+            } catch(e) {}
+          }
+
           function setupButtonListener() {
             try {
               if (window.parent && window.parent.document) {
@@ -1431,6 +1452,7 @@ def main():
             if (window.parent && window.parent.document) {
               const pDoc = window.parent.document;
               setupButtonListener();
+              setupFavicon(pDoc);
               setupNavLinksAndScrollSpy();
               setupAllSectionsScrollFade(pDoc);
               setup3DCardTilt(pDoc);
