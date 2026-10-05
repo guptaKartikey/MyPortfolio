@@ -91,10 +91,11 @@ def render_preloader():
                     align-items: center !important;
                     justify-content: center !important;
                     overflow: hidden !important;
-                    transition: opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1), filter 0.8s ease, transform 0.8s cubic-bezier(0.16, 1, 0.3, 1) !important;
+                    transition: opacity 0.75s cubic-bezier(0.16, 1, 0.3, 1), filter 0.75s ease, transform 0.75s cubic-bezier(0.16, 1, 0.3, 1) !important;
                     will-change: opacity, filter, transform !important;
                     user-select: none !important;
                     font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif !important;
+                    touch-action: manipulation !important;
                 }}
 
                 /* ── Dissolve & Splash Transition ── */
@@ -130,6 +131,7 @@ def render_preloader():
                     background: #000;
                     cursor: pointer;
                     transition: opacity 0.5s ease, transform 0.5s ease;
+                    touch-action: manipulation;
                 }}
 
                 .preloader-main-img {{
@@ -150,8 +152,10 @@ def render_preloader():
                     align-items: center;
                     cursor: pointer;
                     transition: transform 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+                    touch-action: manipulation;
                 }}
-                .lamp-rope-container:hover {{
+                .lamp-rope-container:hover,
+                .lamp-rope-container:active {{
                     transform: translateY(12px);
                 }}
                 .lamp-rope-container.pulled {{
@@ -166,34 +170,35 @@ def render_preloader():
                     transform-origin: top center;
                 }}
                 .lamp-handle {{
-                    width: 32px;
-                    height: 48px;
-                    border-radius: 16px;
+                    width: 36px;
+                    height: 52px;
+                    border-radius: 18px;
                     background: linear-gradient(135deg, #f59e0b, #d97706);
                     border: 2.5px solid #fef08a;
                     box-shadow: 0 0 28px rgba(245, 158, 11, 1), 0 4px 18px rgba(0, 0, 0, 0.7);
                     display: flex;
                     align-items: center;
                     justify-content: center;
-                    font-size: 1.2rem;
+                    font-size: 1.3rem;
                     color: #000;
                     font-weight: 900;
                     cursor: pointer;
                     margin-top: -2px;
                     transition: transform 0.2s ease, box-shadow 0.2s ease;
                 }}
-                .lamp-rope-container:hover .lamp-handle {{
+                .lamp-rope-container:hover .lamp-handle,
+                .lamp-rope-container:active .lamp-handle {{
                     transform: scale(1.15);
                     box-shadow: 0 0 35px rgba(245, 158, 11, 1), 0 0 15px #ffffff;
                 }}
                 .lamp-rope-tag {{
                     margin-top: 10px;
-                    padding: 6px 14px;
+                    padding: 7px 16px;
                     border-radius: 50px;
                     background: rgba(0, 0, 0, 0.9);
                     border: 2px solid rgba(245, 158, 11, 0.75);
                     color: #fef08a;
-                    font-size: 0.80rem;
+                    font-size: 0.82rem;
                     font-weight: 800;
                     letter-spacing: 0.5px;
                     white-space: nowrap;
@@ -220,7 +225,8 @@ def render_preloader():
                     z-index: 200;
                     background: #000000;
                     opacity: 0;
-                    transition: opacity 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+                    transition: opacity 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+                    cursor: pointer;
                 }}
                 .preloader-video-stage.video-active {{
                     display: flex !important;
@@ -229,11 +235,11 @@ def render_preloader():
 
                 .preloader-video-container {{
                     position: relative;
-                    width: 90vw;
+                    width: 92vw;
                     max-width: 1200px;
-                    max-height: 85vh;
+                    max-height: 82vh;
                     aspect-ratio: 16 / 9;
-                    border-radius: 24px;
+                    border-radius: 22px;
                     overflow: hidden;
                     box-shadow: 0 30px 90px rgba(0, 0, 0, 0.95), 0 0 60px rgba(0, 212, 255, 0.3), 0 0 100px rgba(168, 85, 247, 0.25);
                     border: 2px solid rgba(0, 212, 255, 0.4);
@@ -243,7 +249,7 @@ def render_preloader():
                 .preloader-video-elem {{
                     width: 100%;
                     height: 100%;
-                    object-fit: cover;
+                    object-fit: contain;
                     display: block;
                     background: #000;
                 }}
@@ -251,31 +257,49 @@ def render_preloader():
                 /* ── Top-Right Glowing Skip Button ── */
                 .video-skip-btn {{
                     position: fixed !important;
-                    top: 28px !important;
-                    right: 36px !important;
+                    top: max(20px, env(safe-area-inset-top, 20px)) !important;
+                    right: max(20px, env(safe-area-inset-right, 20px)) !important;
                     z-index: 99999999999 !important;
                     display: inline-flex !important;
                     align-items: center !important;
-                    gap: 10px !important;
-                    padding: 12px 28px !important;
+                    gap: 8px !important;
+                    padding: 12px 24px !important;
                     border-radius: 50px !important;
-                    background: rgba(10, 12, 28, 0.88) !important;
-                    border: 1.5px solid rgba(0, 212, 255, 0.55) !important;
+                    background: rgba(10, 12, 28, 0.92) !important;
+                    border: 1.5px solid rgba(0, 212, 255, 0.6) !important;
                     color: #ffffff !important;
                     font-size: 0.92rem !important;
                     font-weight: 800 !important;
                     letter-spacing: 0.5px !important;
                     cursor: pointer !important;
-                    backdrop-filter: blur(18px) !important;
-                    -webkit-backdrop-filter: blur(18px) !important;
-                    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.6), 0 0 25px rgba(0, 212, 255, 0.4) !important;
+                    backdrop-filter: blur(20px) !important;
+                    -webkit-backdrop-filter: blur(20px) !important;
+                    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.7), 0 0 25px rgba(0, 212, 255, 0.4) !important;
                     transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1) !important;
+                    touch-action: manipulation !important;
                 }}
-                .video-skip-btn:hover {{
+                .video-skip-btn:hover,
+                .video-skip-btn:active {{
                     transform: translateY(-2px) scale(1.04) !important;
-                    background: linear-gradient(135deg, rgba(0, 212, 255, 0.35), rgba(168, 85, 247, 0.35)) !important;
+                    background: linear-gradient(135deg, rgba(0, 212, 255, 0.45), rgba(168, 85, 247, 0.45)) !important;
                     border-color: #00d4ff !important;
-                    box-shadow: 0 10px 35px rgba(0, 212, 255, 0.7), 0 0 30px rgba(168, 85, 247, 0.5) !important;
+                    box-shadow: 0 10px 35px rgba(0, 212, 255, 0.8), 0 0 30px rgba(168, 85, 247, 0.6) !important;
+                }}
+
+                .preloader-bottom-hint {{
+                    position: absolute;
+                    bottom: max(18px, env(safe-area-inset-bottom, 18px));
+                    left: 50%;
+                    transform: translateX(-50%);
+                    color: rgba(255, 255, 255, 0.65);
+                    font-size: 0.78rem;
+                    letter-spacing: 0.5px;
+                    pointer-events: none;
+                    background: rgba(0, 0, 0, 0.6);
+                    padding: 5px 14px;
+                    border-radius: 20px;
+                    border: 1px solid rgba(255, 255, 255, 0.1);
+                    backdrop-filter: blur(8px);
                 }}
 
                 .preloader-bottom-enter-btn {{
@@ -284,25 +308,27 @@ def render_preloader():
                     right: 32px;
                     padding: 10px 26px;
                     border-radius: 50px;
-                    background: rgba(255, 255, 255, 0.1);
-                    border: 1.5px solid rgba(0, 212, 255, 0.5);
+                    background: rgba(255, 255, 255, 0.12);
+                    border: 1.5px solid rgba(0, 212, 255, 0.6);
                     color: #ffffff;
-                    font-size: 0.84rem;
+                    font-size: 0.86rem;
                     font-weight: 700;
                     cursor: pointer;
-                    backdrop-filter: blur(12px);
+                    backdrop-filter: blur(14px);
                     transition: all 0.25s ease;
                     display: flex;
                     align-items: center;
                     gap: 8px;
                     z-index: 100;
-                    box-shadow: 0 4px 20px rgba(0, 212, 255, 0.25);
+                    box-shadow: 0 4px 20px rgba(0, 212, 255, 0.3);
+                    touch-action: manipulation;
                 }}
-                .preloader-bottom-enter-btn:hover {{
-                    background: linear-gradient(135deg, rgba(0, 212, 255, 0.35), rgba(168, 85, 247, 0.35));
+                .preloader-bottom-enter-btn:hover,
+                .preloader-bottom-enter-btn:active {{
+                    background: linear-gradient(135deg, rgba(0, 212, 255, 0.4), rgba(168, 85, 247, 0.4));
                     border-color: #00d4ff;
                     transform: translateY(-2px);
-                    box-shadow: 0 6px 25px rgba(0, 212, 255, 0.5);
+                    box-shadow: 0 6px 25px rgba(0, 212, 255, 0.6);
                 }}
 
                 /* ── Animated Splash Ripple Wave Effect ── */
@@ -315,13 +341,13 @@ def render_preloader():
                     margin-top: -5px;
                     margin-left: -5px;
                     border-radius: 50%;
-                    background: radial-gradient(circle, rgba(0, 212, 255, 0.9) 0%, rgba(168, 85, 247, 0.75) 40%, transparent 75%);
+                    background: radial-gradient(circle, rgba(0, 212, 255, 0.95) 0%, rgba(168, 85, 247, 0.8) 40%, transparent 75%);
                     pointer-events: none;
                     opacity: 0;
                     z-index: 300;
                 }}
                 .splash-ripple-wave.splash-animate {{
-                    animation: rippleExpand 0.9s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+                    animation: rippleExpand 0.85s cubic-bezier(0.16, 1, 0.3, 1) forwards;
                 }}
                 @keyframes rippleExpand {{
                     0% {{ transform: scale(1); opacity: 0.95; }}
@@ -329,10 +355,21 @@ def render_preloader():
                 }}
 
                 @media (max-width: 768px) {{
-                    .lamp-rope-container {{ right: 15px; }}
-                    .lamp-cord {{ height: 85px; }}
-                    .video-skip-btn {{ top: 16px; right: 16px; padding: 8px 18px; font-size: 0.80rem; }}
-                    .preloader-bottom-enter-btn {{ bottom: 12px; right: 16px; padding: 6px 16px; font-size: 0.75rem; }}
+                    .lamp-rope-container {{ right: 14px; top: 0; }}
+                    .lamp-cord {{ height: 85px; width: 3px; }}
+                    .lamp-handle {{ width: 32px; height: 46px; font-size: 1.15rem; }}
+                    .lamp-rope-tag {{ font-size: 0.72rem; padding: 5px 10px; margin-top: 6px; }}
+                    .video-skip-btn {{
+                        top: max(14px, env(safe-area-inset-top, 14px)) !important;
+                        right: max(14px, env(safe-area-inset-right, 14px)) !important;
+                        padding: 10px 20px !important;
+                        font-size: 0.82rem !important;
+                    }}
+                    .preloader-bottom-enter-btn {{ bottom: 14px; right: 14px; padding: 8px 18px; font-size: 0.78rem; }}
+                    .preloader-video-container {{
+                        width: 95vw;
+                        border-radius: 16px;
+                    }}
                 }}
                 </style>
 
@@ -354,14 +391,22 @@ def render_preloader():
                 </button>
 
                 <!-- Stage 2: Fullscreen Cinematic Video Player with Skip Button in Right Corner -->
-                <div class="preloader-video-stage" id="preloader-video-stage">
+                <div class="preloader-video-stage" id="preloader-video-stage" title="Tap to skip intro">
                     <button class="video-skip-btn" id="video-skip-btn" title="Skip Intro & Enter">
                         <span>Skip Intro</span> &nbsp;⏩
                     </button>
                     <div class="preloader-video-container">
-                        <video class="preloader-video-elem" id="preloader-video-elem" playsinline preload="auto">
+                        <video
+                            class="preloader-video-elem"
+                            id="preloader-video-elem"
+                            playsinline
+                            webkit-playsinline
+                            x5-playsinline
+                            x5-video-player-type="h5-page"
+                            preload="auto">
                         </video>
                     </div>
+                    <div class="preloader-bottom-hint">Tap anywhere to skip intro</div>
                 </div>
 
                 <!-- Stage 3: Splash Ripple Wave -->
@@ -379,6 +424,7 @@ def render_preloader():
             var splashWave = pDoc.getElementById('splash-ripple-wave');
 
             var isDismissed = false;
+            var safetyTimer = null;
 
             function startBackgroundMusic() {{
                 try {{
@@ -388,7 +434,18 @@ def render_preloader():
                             if (audio.paused) {{
                                 var p = audio.play();
                                 if (p !== undefined) {{
-                                    p.catch(function(e) {{ console.log('Autoplay deferred:', e); }});
+                                    p.catch(function(e) {{
+                                        console.log('Autoplay deferred on mobile, will play on next user gesture:', e);
+                                        function playOnTouch() {{
+                                            audio.play().catch(function() {{}});
+                                            pDoc.removeEventListener('click', playOnTouch);
+                                            pDoc.removeEventListener('touchstart', playOnTouch);
+                                            pDoc.removeEventListener('scroll', playOnTouch);
+                                        }}
+                                        pDoc.addEventListener('click', playOnTouch, {{ once: true, passive: true }});
+                                        pDoc.addEventListener('touchstart', playOnTouch, {{ once: true, passive: true }});
+                                        pDoc.addEventListener('scroll', playOnTouch, {{ once: true, passive: true }});
+                                    }});
                                 }}
                             }}
                             return true;
@@ -415,9 +472,18 @@ def render_preloader():
                 if (isDismissed) return;
                 isDismissed = true;
 
-                // Stop video if running
+                if (safetyTimer) {{
+                    clearTimeout(safetyTimer);
+                    safetyTimer = null;
+                }}
+
+                // Stop video cleanly
                 if (videoElem) {{
-                    try {{ videoElem.pause(); }} catch(e) {{}}
+                    try {{
+                        videoElem.pause();
+                        videoElem.removeAttribute('src');
+                        videoElem.load();
+                    }} catch(e) {{}}
                 }}
 
                 // Start ambient background music
@@ -436,72 +502,120 @@ def render_preloader():
                             if (overlay.parentNode) {{
                                 overlay.parentNode.removeChild(overlay);
                             }}
-                        }}, 850);
+                        }}, 800);
                     }}
-                }}, 150);
+                }}, 100);
             }}
 
-            /* ── Handle Pull Rope Click ── */
+            /* ── Robust Video Playback with Muted Fallback for Phones ── */
+            function startVideoSafely() {{
+                if (!videoElem || !videoSrc) {{
+                    executeDissolveAndSplash();
+                    return;
+                }}
+
+                videoElem.src = videoSrc;
+                videoElem.volume = 0.85;
+
+                // Event handlers to ensure it never gets stuck
+                videoElem.onended = function() {{
+                    executeDissolveAndSplash();
+                }};
+                videoElem.onerror = function(err) {{
+                    console.warn('Video failed to load or decode, dissolving smoothly:', err);
+                    executeDissolveAndSplash();
+                }};
+
+                // Try playing with audio synchronously
+                var p = videoElem.play();
+                if (p !== undefined) {{
+                    p.then(function() {{
+                        // Successfully playing
+                        armSafetyTimer();
+                    }}).catch(function(err) {{
+                        console.warn('Direct unmuted play blocked on mobile, retrying muted:', err);
+                        // Mobile browser blocked unmuted autoplay -> immediately switch to muted and play
+                        videoElem.muted = true;
+                        videoElem.play().then(function() {{
+                            armSafetyTimer();
+                        }}).catch(function(finalErr) {{
+                            console.error('Video playback completely unsupported/failed, dissolving:', finalErr);
+                            executeDissolveAndSplash();
+                        }});
+                    }});
+                }} else {{
+                    armSafetyTimer();
+                }}
+            }}
+
+            function armSafetyTimer() {{
+                if (safetyTimer) clearTimeout(safetyTimer);
+                // Set fallback timer based on video duration or safe default of 10s
+                var durationSec = (videoElem && videoElem.duration && !isNaN(videoElem.duration) && videoElem.duration > 0) ? videoElem.duration : 10;
+                var timeoutMs = Math.min(Math.max((durationSec + 2) * 1000, 5000), 20000);
+                safetyTimer = setTimeout(function() {{
+                    if (!isDismissed) {{
+                        console.log('Video safety timeout reached, completing intro.');
+                        executeDissolveAndSplash();
+                    }}
+                }}, timeoutMs);
+            }}
+
+            /* ── Handle Pull Rope / Enter Click ── */
             function onRopePulled() {{
                 if (ropeTrigger) {{
                     ropeTrigger.classList.add('pulled');
                 }}
 
                 if (hasVideo && videoSrc && videoStage && videoElem) {{
-                    // Transition from photo to Video Stage
-                    setTimeout(function() {{
-                        if (photoFrame) photoFrame.style.display = 'none';
-                        if (ropeTrigger) ropeTrigger.style.display = 'none';
-                        if (enterTrigger) enterTrigger.style.display = 'none';
+                    // Hide stage 1 immediately
+                    if (photoFrame) photoFrame.style.display = 'none';
+                    if (ropeTrigger) ropeTrigger.style.display = 'none';
+                    if (enterTrigger) enterTrigger.style.display = 'none';
 
-                        videoStage.classList.add('video-active');
-                        videoElem.src = videoSrc;
-                        videoElem.volume = 0.85;
-                        var playPromise = videoElem.play();
-                        if (playPromise !== undefined) {{
-                            playPromise.catch(function(e) {{
-                                console.log('Video autoplay error:', e);
-                            }});
-                        }}
+                    // Activate video stage
+                    videoStage.classList.add('video-active');
 
-                        // When video ends naturally, trigger dissolve and splash
-                        videoElem.addEventListener('ended', function() {{
-                            executeDissolveAndSplash();
-                        }});
-                    }}, 250);
+                    // Start video synchronously inside the user event handler
+                    startVideoSafely();
                 }} else {{
-                    // No video configured: directly dissolve & splash
+                    // No video: directly dissolve & splash
                     setTimeout(function() {{
                         executeDissolveAndSplash();
-                    }}, 250);
+                    }}, 200);
                 }}
             }}
 
-            if (ropeTrigger) {{
-                ropeTrigger.addEventListener('click', function(e) {{
-                    e.preventDefault();
-                    onRopePulled();
-                }});
+            // Event bindings with multi-touch / click support
+            function addMultiEvent(el, handler) {{
+                if (!el) return;
+                var triggered = false;
+                function triggerOnce(e) {{
+                    if (e) {{
+                        e.preventDefault();
+                        e.stopPropagation();
+                    }}
+                    if (!triggered) {{
+                        triggered = true;
+                        handler();
+                        setTimeout(function() {{ triggered = false; }}, 500);
+                    }}
+                }}
+                el.addEventListener('click', triggerOnce);
+                el.addEventListener('touchend', triggerOnce, {{ passive: false }});
             }}
-            if (enterTrigger) {{
-                enterTrigger.addEventListener('click', function(e) {{
-                    e.preventDefault();
-                    onRopePulled();
-                }});
-            }}
-            if (photoFrame) {{
-                photoFrame.addEventListener('click', function(e) {{
-                    e.preventDefault();
-                    onRopePulled();
-                }});
-            }}
-            if (skipBtn) {{
-                skipBtn.addEventListener('click', function(e) {{
-                    e.preventDefault();
-                    e.stopPropagation();
-                    executeDissolveAndSplash();
-                }});
-            }}
+
+            addMultiEvent(ropeTrigger, onRopePulled);
+            addMultiEvent(enterTrigger, onRopePulled);
+            addMultiEvent(photoFrame, onRopePulled);
+
+            // Skip button & tap anywhere on video stage to skip
+            addMultiEvent(skipBtn, function() {{
+                executeDissolveAndSplash();
+            }});
+            addMultiEvent(videoStage, function() {{
+                executeDissolveAndSplash();
+            }});
 
         }} catch(err) {{
             console.error(err);
@@ -509,3 +623,4 @@ def render_preloader():
     }})();
     </script>
     """, height=0, width=0)
+

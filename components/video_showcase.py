@@ -289,6 +289,9 @@ html, body {{
                 id="showcase-vid"
                 src="data:video/mp4;base64,{video_b64}"
                 playsinline
+                webkit-playsinline
+                x5-playsinline
+                x5-video-player-type="h5-page"
                 loop
                 preload="auto"
             ></video>
