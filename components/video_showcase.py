@@ -51,6 +51,10 @@ def render_video_showcase():
     if not profile.get("enable_showcase_video", True):
         return
 
+    video_b64 = _get_showcase_video_b64()
+    if not video_b64:
+        return
+
     html_content = f"""<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -283,19 +287,11 @@ html, body {{
         <div class="video-wrapper" id="vid-wrapper">
             <video
                 id="showcase-vid"
+                src="data:video/mp4;base64,{video_b64}"
                 playsinline
-                webkit-playsinline
-                x5-playsinline
-                x5-video-player-type="h5-page"
                 loop
                 preload="auto"
-            >
-                <source src="/app/static/video/vid_1.mp4" type="video/mp4">
-                <source src="app/static/video/vid_1.mp4" type="video/mp4">
-                <source src="/static/video/vid_1.mp4" type="video/mp4">
-                <source src="static/video/vid_1.mp4" type="video/mp4">
-                <source src="assets/video/vid_1.mp4" type="video/mp4">
-            </video>
+            ></video>
 
             <!-- Minimal HUD Overlay -->
             <div class="hud-overlay">

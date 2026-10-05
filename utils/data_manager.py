@@ -31,10 +31,6 @@ PROJECT_IMG_DIR  = ASSETS_DIR / "projects"
 CERT_IMG_DIR     = ASSETS_DIR / "certificates"
 RESUME_DIR       = ASSETS_DIR / "resume"
 VIDEO_DIR        = ASSETS_DIR / "video"
-STATIC_DIR       = BASE_DIR / "static"
-STATIC_VIDEO_DIR = STATIC_DIR / "video"
-STATIC_ASSETS_DIR= STATIC_DIR / "assets"
-
 
 # JSON file paths
 PROFILE_FILE      = DATA_DIR / "profile.json"
@@ -55,14 +51,9 @@ def ensure_dirs() -> None:
         CERT_IMG_DIR,
         RESUME_DIR,
         VIDEO_DIR,
-        STATIC_DIR,
-        STATIC_VIDEO_DIR,
-        STATIC_ASSETS_DIR,
     ]
     for d in dirs:
         d.mkdir(parents=True, exist_ok=True)
-
-
 
 
 # ──────────────────────────────────────────────
