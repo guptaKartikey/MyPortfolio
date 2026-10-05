@@ -821,8 +821,7 @@ NAV_HTML = """
 # ═══════════════════════════════════════════════════════════════════════════════
 def _footer_html(name: str, github: str) -> str:
     import textwrap
-    from datetime import datetime
-    year = datetime.now().year
+    display_name = name.upper() if name else "KARTIKEY GUPTA"
     return textwrap.dedent(f"""
 <footer class="portfolio-footer" style="
     visibility: visible !important;
@@ -839,12 +838,13 @@ def _footer_html(name: str, github: str) -> str:
 ">
     <div style="
         display: flex;
-        justify-content: space-between;
+        justify-content: center;
         align-items: center;
         flex-wrap: wrap;
-        gap: 12px;
+        gap: 20px;
         max-width: 1400px;
         margin: 0 auto;
+        text-align: center;
         font-size: 0.92rem;
         font-weight: 600;
         color: #cbd5e1;
@@ -852,8 +852,9 @@ def _footer_html(name: str, github: str) -> str:
         <div>
             🐍 Made With <span style="color:#00d4ff; font-weight:800;">Python</span>
         </div>
+        <div style="color: rgba(0, 212, 255, 0.4); font-size: 0.9rem;">•</div>
         <div>
-            Designed By <span style="background: linear-gradient(135deg, #00d4ff, #a855f7); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-weight: 900; letter-spacing: 0.5px;">KARTIKEY GUPTA</span>
+            Designed By <span style="background: linear-gradient(135deg, #00d4ff, #a855f7); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-weight: 900; letter-spacing: 0.5px;">{display_name}</span>
         </div>
     </div>
 </footer>
