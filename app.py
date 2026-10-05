@@ -1106,91 +1106,29 @@ def main():
 
               function updateSectionFades() {
                 const scrollY = getScroll();
-                const vh = window.parent ? window.parent.innerHeight : window.innerHeight;
 
-                // 1. Hero Iframe Fade & Parallax
-                const iframes = pDoc.querySelectorAll('iframe');
+                // 1. Hero Iframe Parallax (Target only top hero iframe, NOT video showcase!)
+                const allIframes = pDoc.querySelectorAll('iframe');
                 let heroIframe = null;
-                iframes.forEach(f => {
-                  if (f.offsetHeight >= 400 || (f.parentElement && f.parentElement.offsetHeight >= 400)) {
-                    heroIframe = f;
+                const aboutEl = pDoc.getElementById('about');
+                allIframes.forEach(f => {
+                  if (aboutEl && (f.compareDocumentPosition(aboutEl) & Node.DOCUMENT_POSITION_FOLLOWING)) {
+                    if (f.offsetHeight >= 350) heroIframe = f;
                   }
                 });
+                if (!heroIframe && allIframes.length > 0) {
+                  heroIframe = allIframes[0];
+                }
 
                 if (heroIframe) {
-                  const p = Math.min(1, Math.max(0, scrollY / 460));
-                  const scale = 1 - (p * 0.10);
-                  const translateY = p * 35;
-                  const blur = p * 5;
-                  const opacity = Math.max(0, 1 - (p * 0.85));
-
-                  heroIframe.style.setProperty('transform', `perspective(1000px) translateY(${translateY.toFixed(1)}px) scale(${scale.toFixed(4)})`, 'important');
-                  heroIframe.style.setProperty('opacity', `${opacity.toFixed(3)}`, 'important');
-                  heroIframe.style.setProperty('filter', `blur(${blur.toFixed(1)}px)`, 'important');
-                  heroIframe.style.setProperty('transform-origin', 'center top', 'important');
-                  heroIframe.style.setProperty('will-change', 'transform, opacity, filter', 'important');
-
                   try {
                     heroIframe.contentWindow.postMessage({ type: 'HERO_SCROLL', scrollY: scrollY }, '*');
                   } catch(err) {}
                 }
 
-                // 2. All Other Major Sections & Card Containers Fade In/Out
-                const sectionSelectors = [
-                  '.about-profile-card-3d',
-                  '.who-i-am-card-3d',
-                  '.edu-card-3d',
-                  '.interests-section-3d',
-                  '.skills-header-container',
-                  '.skill-card-img2',
-                  '.projects-header-container',
-                  '.project-card-3d',
-                  '.exp-header-container',
-                  '.timeline-item',
-                  '.cert-header-container',
-                  '.cert-card-3d',
-                  '.contact-header-container',
-                  '.contact-info-card-3d',
-                  '.contact-form-3d',
-                  '.portfolio-footer'
-                ];
-
-                const targets = pDoc.querySelectorAll(sectionSelectors.join(', '));
-                targets.forEach(el => {
-                  const rect = el.getBoundingClientRect();
-                  const elTop = rect.top;
-                  const elBottom = rect.bottom;
-                  const elHeight = rect.height || 220;
-
-                  let opacity = 1;
-                  let scale = 1;
-                  let translateY = 0;
-                  let blur = 0;
-
-                  // Top exit fade (scrolling above viewport header zone)
-                  if (elTop < 75) {
-                    const exitProgress = Math.min(1, Math.max(0, (75 - elTop) / (elHeight * 0.85 || 240)));
-                    opacity = Math.max(0.08, 1 - (exitProgress * 0.88));
-                    scale = 1 - (exitProgress * 0.06);
-                    translateY = exitProgress * 22;
-                    blur = exitProgress * 4;
-                  }
-                  // Bottom enter fade (entering from bottom of screen)
-                  else if (elBottom > vh - 40) {
-                    const distFromBottom = elTop - (vh - 40);
-                    if (distFromBottom > 0) {
-                      const enterProgress = Math.min(1, Math.max(0, distFromBottom / 260));
-                      opacity = Math.max(0.1, 1 - (enterProgress * 0.9));
-                      scale = 1 - (enterProgress * 0.05);
-                      translateY = enterProgress * 24;
-                      blur = enterProgress * 3;
-                    }
-                  }
-
-                  el.style.setProperty('transform', `perspective(1000px) translateY(${translateY.toFixed(1)}px) scale(${scale.toFixed(4)})`, 'important');
-                  el.style.setProperty('opacity', `${opacity.toFixed(3)}`, 'important');
-                  el.style.setProperty('filter', `blur(${blur.toFixed(1)}px)`, 'important');
-                  el.style.setProperty('will-change', 'transform, opacity, filter', 'important');
+                // Ensure all iframes (especially video showcase) stay 100% crisp without blur
+                allIframes.forEach(f => {
+                  f.style.setProperty('filter', 'none', 'important');
                 });
               }
 
@@ -1207,7 +1145,7 @@ def main():
                   t.addEventListener('scroll', updateSectionFades, { passive: true });
                 }
               });
-              setInterval(updateSectionFades, 40);
+              setInterval(updateSectionFades, 200);
             } catch(e) {}
           }
 
