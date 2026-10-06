@@ -667,7 +667,7 @@ I enjoy building practical projects using **Python, Data Analytics, AI/ML and mo
 ### 🔗 Connect With Me
 
 - 💼 LinkedIn: https://www.linkedin.com/in/kartikey-gupta-988206372/
-- 🐙 GitHub: https://github.com/YOUR_USERNAME
+- 🐙 GitHub: https://github.com/guptaKartikey
 - 🌐 Portfolio: https://kartikey-gupta-portfolio.streamlit.app/
 
 ---
