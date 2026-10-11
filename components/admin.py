@@ -28,7 +28,7 @@ from utils.data_manager import (
     load_certificates, save_certificates,
     load_experience, save_experience,
     load_messages, save_messages,
-    next_id,
+    next_id, is_firebase_connected,
     PROFILE_IMG_DIR, PROJECT_IMG_DIR, CERT_IMG_DIR, RESUME_DIR, VIDEO_DIR,
 )
 from utils.helpers import inject_html, save_uploaded_file, is_placeholder
@@ -715,6 +715,11 @@ def render_admin():
     if st.button("🚪 Logout", type="secondary"):
         st.session_state.admin_authenticated = False
         st.rerun()
+
+    if is_firebase_connected():
+        st.success("☁️ **Firebase Firestore Connected** — Changes are saved permanently to Google Cloud (won't reset on sleep/restart).")
+    else:
+        st.info("💾 **Local Storage Mode** — Saving to local files. (Add Firebase credentials to Streamlit secrets for 24/7 cloud persistence).")
 
     st.divider()
 
